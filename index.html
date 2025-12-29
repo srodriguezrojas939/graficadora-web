@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Graficadora Pro - Raiz Cuadrada</title>
 
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
@@ -16,117 +16,164 @@
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
 
-        .fade-in { opacity: 0; transform: translateY(25px); animation: fadeUp 0.9s ease forwards; }
-        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-        body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-
-        .calculadora-moderna {
-            max-width: 650px; width: 100%; padding: 40px 30px;
-            background: #F2F2F2; border-radius: 35px;
-            font-family: 'Open Sans', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        /* Reset y layout base */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            font-family: 'Open Sans', sans-serif;
+            -webkit-text-size-adjust: 100%;
+            overflow-x: hidden; /* evita scroll horizontal en móviles */
         }
 
-        .header-section { text-align: center; margin-bottom: 25px; }
-        .header-section h1 { font-size: 32px; margin: 0; font-family: 'Playfair Display', serif; }
-        .header-section p { font-size: 18px; font-weight: 600; color: #333; font-family: 'Playfair Display', serif; margin: 5px 0; }
+        /* Contenedor centrado pero responsivo */
+        .page-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* top en pantallas pequeñas evita recortes por centrado vertical */
+            min-height: 100vh;
+            padding: 10px; /* pequeño buffer para que no pegue al borde del iframe */
+        }
 
-        label { display: block; font-size: 13px; margin-bottom: 8px; margin-left: 10px; font-weight: 600; }
+        .calculadora-moderna {
+            width: 100%;
+            max-width: 920px;
+            background: #F2F2F2;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .header-section { text-align: center; margin-bottom: 4px; }
+        .header-section h1 { font-size: 20px; margin: 0; font-family: 'Playfair Display', serif; }
+        .header-section p { font-size: 13px; font-weight: 600; color: #333; margin: 2px 0 8px; }
+
+        label { display: block; font-size: 12px; margin-bottom: 6px; margin-left: 4px; font-weight: 600; }
+
+        .input-list { display: flex; flex-direction: column; gap: 8px; }
 
         .input-group {
-            display: flex; gap: 10px; position: relative;
-            margin-bottom: 12px; align-items: center; padding-right: 40px;
+            display: flex; gap: 8px; position: relative;
+            align-items: center;
         }
 
         input, select {
-            font-family: 'Open Sans', sans-serif; font-size: 14px;
-            padding: 12px 15px; border: 1px solid #ccc; border-radius: 25px;
-            background: white; box-sizing: border-box; transition: 0.3s;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 13px;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            background: white;
+            transition: 0.18s;
         }
 
-        /* --- ESTILO DEL SELECTOR DE COLOR COMO CÍRCULO --- */
+        .input-group .fn-input { flex: 1; min-width: 0; }
+
         .input-group .color-select {
-            width: 38px; /* Tamaño fijo cuadrado */
-            height: 38px;
-            border-radius: 50%; /* Lo hace circular */
-            flex-shrink: 0;
+            width: 36px; height: 36px; border-radius: 50%;
+            padding: 0; border: 2px solid #e0e0e0; cursor: pointer;
+            color: transparent;
+        }
+
+        .btn-remove {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: black; color: white; border: none;
+            border-radius: 50%; width: 28px; height: 28px;
+            font-size: 16px; display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            appearance: none; /* Elimina la flecha por defecto */
-            -webkit-appearance: none;
-            border: 2px solid #e0e0e0; /* Borde sutil */
-            padding: 0;
-            color: transparent; /* Oculta el texto seleccionado */
-            /* El color de fondo se define en línea por JS */
         }
 
-        /* Estilo para las opciones del desplegable */
-        .color-select option {
-            padding: 10px;
-            color: transparent; /* Oculta el texto en las opciones */
-            /* El fondo se define en línea por JS */
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
-        .input-group .fn-input { flex-grow: 1; }
+        #modo { flex: 1; min-width: 160px; padding: 10px 12px; }
 
-        .btn-remove { 
-            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-            background: black; color: white; border: none; 
-            border-radius: 50%; width: 30px; height: 30px; 
-            cursor: pointer; font-size: 18px; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
+        .botones-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
-        .botones-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .boton-estilo {
-            display: flex; align-items: center; justify-content: center;
-            background: white; border: 1px solid #ccc; border-radius: 30px;
-            padding: 12px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;
+            display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+            background: white; border: 1px solid #ccc; border-radius: 20px;
+            padding: 8px 12px; cursor: pointer; font-weight: 600; font-size: 13px;
         }
         .boton-principal { background: black; color: white; border: none; }
-        .boton-secundario { background: #e0e0e0; border: none; }
 
+        /* Contenedor gráfico adaptativo */
         #contenedor-grafica {
-            margin-top: 25px; background: white; border-radius: 25px;
-            padding: 10px; border: 1px solid #ddd; overflow: hidden;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            overflow: hidden;
         }
-        #grafica { width: 100%; }
-        #info-box { text-align: center; margin-top: 10px; font-size: 12px; color: #666; font-weight: 600; }
-        #modo { width: 100%; margin-bottom: 0; }
+        #grafica { width: 100%; height: 100%; }
+
+        #info-box { text-align: center; font-size: 12px; color: #666; font-weight: 600; margin-top: 4px; }
+
+        /* Mobile tweaks */
+        @media (max-width: 480px) {
+            .calculadora-moderna { padding: 12px; border-radius: 12px; }
+            .header-section h1 { font-size: 18px; }
+            .header-section p { font-size: 12px; }
+            .botones-container { justify-content: space-between; }
+            .btn-remove { right: -4px; width: 26px; height: 26px; font-size: 15px; }
+            label { font-size: 11px; }
+            input, select { font-size: 13px; padding: 9px 10px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="fade-in">
-    <div class="calculadora-moderna">
+<div class="page-wrap">
+    <div class="calculadora-moderna" id="app">
         <div class="header-section">
             <h1>Graficadora Inteligente</h1>
             <p>√(Raiz) Cuadrada²</p>
         </div>
 
-        <div id="lista-funciones">
+        <div id="lista-funciones" class="input-list">
             <label>Funciones f(x)</label>
         </div>
 
-        <button onclick="agregarInput()" class="boton-estilo boton-secundario" style="width: 100%; margin-bottom: 15px; margin-top: 10px;">
-            + Añadir otra función
-        </button>
+        <div class="controls-row">
+            <button onclick="agregarInput()" class="boton-estilo" style="flex: 0 0 auto;">+ Añadir otra función</button>
 
-        <label>Modo de análisis</label>
-        <select id="modo">
-            <option value="normal">Vista Normal</option>
-            <option value="puntos">Máximos, Mínimos y Raíces</option>
-            <option value="area_curva">Área Bajo la Curva (f1 al Eje X)</option>
+            <label style="margin:0 0 0 6px; align-self:center;">Modo</label>
+            <select id="modo">
+                <option value="normal">Vista Normal</option>
+                <option value="puntos">Máximos, Mínimos y Raíces</option>
+                <option value="area_curva">Área Bajo la Curva (f1 al Eje X)</option>
             </select>
 
-        <div class="botones-container">
-            <button onclick="procesar()" class="boton-estilo boton-principal">Actualizar Gráfica</button>
-            <button onclick="exportarImagen()" class="boton-estilo">
-                <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="16" style="margin-right:8px"> 
-                Descargar PNG con Marca de Agua
-            </button>
+            <div style="flex:1"></div>
+
+            <div class="botones-container" style="margin-left:auto;">
+                <button onclick="procesar()" class="boton-estilo boton-principal">Actualizar</button>
+                <button onclick="exportarImagen()" class="boton-estilo">
+                    <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="14" style="margin-right:4px">
+                    Descargar PNG
+                </button>
+            </div>
         </div>
 
-        <div id="contenedor-grafica">
+        <div id="contenedor-grafica" aria-hidden="false">
             <div id="grafica"></div>
         </div>
         <div id="info-box"></div>
@@ -136,6 +183,7 @@
 <canvas id="canvas-export" style="display:none;"></canvas>
 
 <script>
+/* Paleta y helpers */
 const paletaElegante = {
     '#333333': 'Negro Carbón',
     '#5D8AA8': 'Azul Acero',
@@ -149,39 +197,52 @@ function generarOpcionesColor(colorSeleccionado) {
     let html = '';
     for (const [hex, nombre] of Object.entries(paletaElegante)) {
         const selected = hex === colorSeleccionado ? 'selected' : '';
-        // Usamos estilo en línea para el fondo y texto transparente
         html += `<option value="${hex}" ${selected} style="background-color: ${hex}; color: transparent;">${nombre}</option>`;
     }
     return html;
 }
 
+/* Agrega un input para funciones */
 function agregarInput(valorInicial = '', colorInicial = '#333333') {
     const container = document.getElementById('lista-funciones');
     const div = document.createElement('div');
     div.className = 'input-group';
-    // Se añade style inline al select para el color inicial y un onchange para actualizarlo
     div.innerHTML = `
         <input class="fn-input" placeholder="Ej: x^2" value="${valorInicial}">
         <select class="color-select" style="background-color: ${colorInicial};" onchange="this.style.backgroundColor = this.value">
             ${generarOpcionesColor(colorInicial)}
         </select>
-        <button class="btn-remove" onclick="if(document.querySelectorAll('.input-group').length > 1) { this.parentElement.remove(); procesar(); }">×</button>
+        <button class="btn-remove" title="Eliminar" onclick="if(document.querySelectorAll('.input-group').length > 1) { this.parentElement.remove(); procesar(); }">×</button>
     `;
     container.appendChild(div);
 }
 
-window.onload = function() {
-    agregarInput('x^2', '#333333');
-    agregarInput('x + 2', '#5D8AA8');
-    procesar();
-};
+/* Calcula tamaño del plot según contenedor y viewport para evitar cortes */
+function calcularTamanioPlot() {
+    const cont = document.getElementById('contenedor-grafica');
+    const maxHeightByViewport = Math.max(220, Math.floor(window.innerHeight * 0.45)); // no más grande que 45% de la altura de pantalla
+    const width = Math.max(300, cont.clientWidth - 4); // ancho mínimo
+    // relación de aspecto aproximada; adaptamos para móvil
+    const height = Math.min(580, Math.max(220, Math.round(width * 0.56), maxHeightByViewport));
+    return { width, height };
+}
 
+/* Debounce rápido para resize */
+function debounce(fn, wait = 120) {
+    let t;
+    return function(...args) {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), wait);
+    };
+}
+
+/* Procesar y dibujar gráfico (ahora responsivo) */
 function procesar() {
     const gruposInputs = document.querySelectorAll('.input-group');
     const modo = document.getElementById('modo').value;
     const info = document.getElementById('info-box');
     document.getElementById('grafica').innerHTML = "";
-    
+
     let data = [];
     let funcionesValidas = [];
 
@@ -189,9 +250,8 @@ function procesar() {
         gruposInputs.forEach((grupo) => {
             const fnValue = grupo.querySelector('.fn-input').value.trim();
             const colorValue = grupo.querySelector('.color-select').value;
-            if(fnValue !== "") {
+            if (fnValue !== "") {
                 funcionesValidas.push({ fn: fnValue, color: colorValue });
-                // Siempre añadimos la línea base
                 data.push({ fn: fnValue, color: colorValue });
             }
         });
@@ -202,29 +262,34 @@ function procesar() {
                     let der = nerdamer.diff(item.fn, 'x').toString();
                     let criticos = nerdamer.solve(der, 'x').symbol.elements;
                     criticos.forEach(c => {
-                        let x = parseFloat(c.multiplier.num.toString());
-                        let y = parseFloat(nerdamer(item.fn).evaluate({x: x}).toString());
-                        if(!isNaN(x) && !isNaN(y)) {
-                            data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: item.color, attr: { r: 6, stroke: 'black', 'stroke-width': 2 } });
+                        // intento razonable de extraer valor numérico
+                        const maybe = parseFloat(c.toString());
+                        if (!isNaN(maybe)) {
+                            const x = maybe;
+                            const y = parseFloat(nerdamer(item.fn).evaluate({ x }).toString());
+                            if (!isNaN(x) && !isNaN(y)) {
+                                data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: item.color, attr: { r: 6, stroke: 'black', 'stroke-width': 2 } });
+                            }
                         }
                     });
-                } catch(e) {}
+                } catch (e) {}
             });
-            info.innerHTML = "Marcando puntos críticos y raíces";
+            info.textContent = "Marcando puntos críticos y raíces";
+        } else {
+            info.textContent = "";
         }
 
         if (modo === 'area_curva' && funcionesValidas.length >= 1) {
-            // Se sobreescribe la primera función para que tenga el área cerrada al eje X
             data[0].closed = true;
-            info.innerHTML = "Área de la primera función respecto al eje X";
+            info.textContent = "Área de la primera función respecto al eje X";
         }
 
-        // Lógica de 'area_entre' eliminada
+        const size = calcularTamanioPlot();
 
         functionPlot({
             target: "#grafica",
-            width: 580,
-            height: 400,
+            width: size.width,
+            height: size.height,
             grid: true,
             data: data
         });
@@ -234,27 +299,32 @@ function procesar() {
     }
 }
 
+/* Exporta PNG con marca de agua; usa tamaño del SVG actual para buena resolución */
 function exportarImagen() {
     const svgElement = document.querySelector('#grafica svg');
+    if (!svgElement) return alert('No hay gráfico para exportar');
+
     const canvas = document.getElementById('canvas-export');
     const ctx = canvas.getContext('2d');
     const svgData = new XMLSerializer().serializeToString(svgElement);
     const img = new Image();
     const svgSize = svgElement.getBoundingClientRect();
-    
-    canvas.width = svgSize.width * 2; 
-    canvas.height = svgSize.height * 2;
-    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+
+    const scale = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(svgSize.width * scale);
+    canvas.height = Math.round(svgSize.height * scale);
+
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
 
-    img.onload = function() {
+    img.onload = function () {
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        ctx.font = "bold 40px 'Playfair Display'";
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.font = `bold ${Math.round(24 * scale)}px 'Playfair Display'`;
+        ctx.fillStyle = "rgba(0,0,0,0.28)";
         ctx.textAlign = "right";
-        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
+        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 12 * scale, canvas.height - 12 * scale);
         const link = document.createElement('a');
         link.download = 'grafica-raiz-cuadrada.png';
         link.href = canvas.toDataURL('image/png');
@@ -263,6 +333,23 @@ function exportarImagen() {
     };
     img.src = url;
 }
+
+/* Inicialización y redibujo en resize/orientationchange */
+window.addEventListener('load', () => {
+    // Añadimos dos funciones por defecto
+    agregarInput('x^2', '#333333');
+    agregarInput('x + 2', '#5D8AA8');
+    procesar();
+});
+
+// Redibuja cuando cambie tamaño de contenedor/ventana
+window.addEventListener('resize', debounce(() => {
+    procesar();
+}, 120));
+window.addEventListener('orientationchange', debounce(() => {
+    // en algunos navegadores orientationchange no dispara resize de inmediato
+    setTimeout(procesar, 180);
+}, 180));
 </script>
 
 </body>
