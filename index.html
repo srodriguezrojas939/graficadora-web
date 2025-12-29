@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graficadora Multi-Función - Raiz Cuadrada</title>
+    <title>Graficadora Pro - Raiz Cuadrada</title>
 
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
 
         .fade-in { opacity: 0; transform: translateY(25px); animation: fadeUp 0.9s ease forwards; }
@@ -33,14 +33,22 @@
 
         label { display: block; font-size: 13px; margin-bottom: 8px; margin-left: 10px; font-weight: 600; }
 
-        .input-group { position: relative; margin-bottom: 10px; }
+        .input-group { position: relative; margin-bottom: 12px; }
         input, select {
             width: 100%; font-family: 'Open Sans', sans-serif; font-size: 14px;
             padding: 12px 15px; border: 1px solid #ccc; border-radius: 25px;
             background: white; box-sizing: border-box; transition: 0.3s;
         }
 
-        .btn-remove { position: absolute; right: 10px; top: 8px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 12px; }
+        /* Botón eliminar corregido: Negro, X blanca y más grande */
+        .btn-remove { 
+            position: absolute; right: 10px; top: 6px; 
+            background: black; color: white; border: none; 
+            border-radius: 50%; width: 30px; height: 30px; 
+            cursor: pointer; font-size: 18px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 0;
+        }
 
         .botones-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .boton-estilo {
@@ -53,15 +61,11 @@
 
         #contenedor-grafica {
             margin-top: 25px; background: white; border-radius: 25px;
-            padding: 10px; border: 1px solid #ddd; position: relative;
+            padding: 10px; border: 1px solid #ddd; overflow: hidden;
         }
 
         #grafica { width: 100%; }
-        
-        /* Estilo para puntos más grandes en la gráfica */
-        .function-plot .tip { font-size: 11px; }
-        
-        #info-box { text-align: center; margin-top: 10px; font-size: 12px; color: #666; }
+        #info-box { text-align: center; margin-top: 10px; font-size: 12px; color: #666; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -69,7 +73,7 @@
 <div class="fade-in">
     <div class="calculadora-moderna">
         <div class="header-section">
-            <h1>Graficadora Multi-Función</h1>
+            <h1>Graficadora Inteligente</h1>
             <p>√(Raiz) Cuadrada²</p>
         </div>
 
@@ -91,6 +95,7 @@
         <select id="modo">
             <option value="normal">Vista Normal</option>
             <option value="puntos">Máximos, Mínimos y Raíces</option>
+            <option value="area_curva">Área Bajo la Curva (Eje X)</option>
             <option value="area_entre">Área entre Funciones (f1 y f2)</option>
         </select>
 
@@ -98,7 +103,7 @@
             <button onclick="procesar()" class="boton-estilo boton-principal">Actualizar Gráfica</button>
             <button onclick="exportarImagen()" class="boton-estilo">
                 <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="16" style="margin-right:8px"> 
-                Descargar con Marca de Agua
+                Descargar PNG con Marca de Agua
             </button>
         </div>
 
@@ -139,15 +144,13 @@ function procesar() {
                 funcionesValidas.push(input.value.trim());
                 data.push({
                     fn: input.value.trim(),
-                    color: colores[i % colores.length],
-                    graphType: 'polyline'
+                    color: colores[i % colores.length]
                 });
             }
         });
 
         if (modo === 'puntos') {
-            funcionesValidas.forEach((f, idx) => {
-                // Máximos y Mínimos (Derivada = 0)
+            funcionesValidas.forEach((f) => {
                 try {
                     let der = nerdamer.diff(f, 'x').toString();
                     let criticos = nerdamer.solve(der, 'x').symbol.elements;
@@ -158,8 +161,6 @@ function procesar() {
                             data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: 'red', attr: { r: 6 } });
                         }
                     });
-
-                    // Raíces
                     let raices = nerdamer.solve(f, 'x').symbol.elements;
                     raices.forEach(r => {
                         let x = parseFloat(r.multiplier.num.toString());
@@ -169,7 +170,12 @@ function procesar() {
                     });
                 } catch(e) {}
             });
-            info.innerHTML = "Puntos grandes: <span style='color:red'>Críticos</span> | <span style='color:blue'>Raíces</span>";
+            info.innerHTML = "Puntos grandes: <span style='color:red'>Máx/Mín</span> | <span style='color:blue'>Raíces</span>";
+        }
+
+        if (modo === 'area_curva' && funcionesValidas.length >= 1) {
+            data[0].closed = true;
+            info.innerHTML = "Área sombreada f1 respecto al eje X";
         }
 
         if (modo === 'area_entre' && funcionesValidas.length >= 2) {
@@ -179,7 +185,7 @@ function procesar() {
                 graphType: 'area',
                 color: 'rgba(0, 0, 0, 0.1)'
             });
-            info.innerHTML = "Sombreado el área comprendida entre las dos primeras funciones";
+            info.innerHTML = "Área sombreada entre las dos primeras funciones";
         }
 
         functionPlot({
@@ -191,7 +197,7 @@ function procesar() {
         });
 
     } catch (e) {
-        info.innerHTML = "<span style='color:red'>Error en las funciones</span>";
+        info.innerHTML = "<span style='color:red'>Error en la expresión</span>";
     }
 }
 
@@ -204,7 +210,7 @@ function exportarImagen() {
     const img = new Image();
     const svgSize = svgElement.getBoundingClientRect();
     
-    canvas.width = svgSize.width * 2; // Alta resolución
+    canvas.width = svgSize.width * 2; 
     canvas.height = svgSize.height * 2;
     
     const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
@@ -215,11 +221,11 @@ function exportarImagen() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
-        // Marca de agua
-        ctx.font = "bold 30px 'Playfair Display'";
-        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        // Marca de agua con Playfair Display Bold
+        ctx.font = "bold 40px 'Playfair Display'";
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.textAlign = "right";
-        ctx.fillText("Raiz Cuadrada²", canvas.width - 40, canvas.height - 40);
+        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
         
         const link = document.createElement('a');
         link.download = 'grafica-raiz-cuadrada.png';
