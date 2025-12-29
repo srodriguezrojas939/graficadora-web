@@ -19,12 +19,13 @@
         .fade-in { opacity: 0; transform: translateY(25px); animation: fadeUp 0.9s ease forwards; }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-        body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
 
         .calculadora-moderna {
             max-width: 650px; width: 100%; padding: 40px 30px;
             background: #F2F2F2; border-radius: 35px;
             font-family: 'Open Sans', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-sizing: border-box;
         }
 
         .header-section { text-align: center; margin-bottom: 25px; }
@@ -44,29 +45,15 @@
             background: white; box-sizing: border-box; transition: 0.3s;
         }
 
-        /* --- ESTILO DEL SELECTOR DE COLOR COMO CÍRCULO --- */
         .input-group .color-select {
-            width: 38px; /* Tamaño fijo cuadrado */
-            height: 38px;
-            border-radius: 50%; /* Lo hace circular */
-            flex-shrink: 0;
-            cursor: pointer;
-            appearance: none; /* Elimina la flecha por defecto */
-            -webkit-appearance: none;
-            border: 2px solid #e0e0e0; /* Borde sutil */
-            padding: 0;
-            color: transparent; /* Oculta el texto seleccionado */
-            /* El color de fondo se define en línea por JS */
+            width: 38px; height: 38px;
+            border-radius: 50%; flex-shrink: 0;
+            cursor: pointer; appearance: none; -webkit-appearance: none;
+            border: 2px solid #e0e0e0; padding: 0; color: transparent;
         }
 
-        /* Estilo para las opciones del desplegable */
-        .color-select option {
-            padding: 10px;
-            color: transparent; /* Oculta el texto en las opciones */
-            /* El fondo se define en línea por JS */
-        }
-
-        .input-group .fn-input { flex-grow: 1; }
+        .color-select option { padding: 10px; color: transparent; }
+        .input-group .fn-input { flex-grow: 1; width: 100%; }
 
         .btn-remove { 
             position: absolute; right: 0; top: 50%; transform: translateY(-50%);
@@ -88,15 +75,27 @@
         #contenedor-grafica {
             margin-top: 25px; background: white; border-radius: 25px;
             padding: 10px; border: 1px solid #ddd; overflow: hidden;
+            display: flex; justify-content: center;
         }
-        #grafica { width: 100%; }
+        #grafica { width: 100%; overflow: hidden; }
         #info-box { text-align: center; margin-top: 10px; font-size: 12px; color: #666; font-weight: 600; }
         #modo { width: 100%; margin-bottom: 0; }
+
+        /* --- OPTIMIZACIÓN PARA MÓVILES --- */
+        @media (max-width: 500px) {
+            body { padding: 10px; }
+            .calculadora-moderna { padding: 25px 20px; border-radius: 25px; }
+            .header-section h1 { font-size: 26px; }
+            .header-section p { font-size: 16px; }
+            .input-group { padding-right: 35px; }
+            .btn-remove { width: 28px; height: 28px; }
+            input, select { font-size: 16px; } /* Evita zoom automático en iOS */
+        }
     </style>
 </head>
 <body>
 
-<div class="fade-in">
+<div class="fade-in" style="width: 100%; display: flex; justify-content: center;">
     <div class="calculadora-moderna">
         <div class="header-section">
             <h1>Graficadora </h1>
@@ -112,11 +111,11 @@
         </button>
 
         <label>Modo de análisis</label>
-        <select id="modo">
+        <select id="modo" onchange="procesar()">
             <option value="normal">Vista Normal</option>
             <option value="puntos">Máximos, Mínimos y Raíces</option>
             <option value="area_curva">Área Bajo la Curva (f1 al Eje X)</option>
-            </select>
+        </select>
 
         <div class="botones-container">
             <button onclick="procesar()" class="boton-estilo boton-principal">Actualizar Gráfica</button>
@@ -149,7 +148,6 @@ function generarOpcionesColor(colorSeleccionado) {
     let html = '';
     for (const [hex, nombre] of Object.entries(paletaElegante)) {
         const selected = hex === colorSeleccionado ? 'selected' : '';
-        // Usamos estilo en línea para el fondo y texto transparente
         html += `<option value="${hex}" ${selected} style="background-color: ${hex}; color: transparent;">${nombre}</option>`;
     }
     return html;
@@ -159,7 +157,6 @@ function agregarInput(valorInicial = '', colorInicial = '#333333') {
     const container = document.getElementById('lista-funciones');
     const div = document.createElement('div');
     div.className = 'input-group';
-    // Se añade style inline al select para el color inicial y un onchange para actualizarlo
     div.innerHTML = `
         <input class="fn-input" placeholder="Ej: x^2" value="${valorInicial}">
         <select class="color-select" style="background-color: ${colorInicial};" onchange="this.style.backgroundColor = this.value">
@@ -176,12 +173,21 @@ window.onload = function() {
     procesar();
 };
 
+// Listener para ajustar la gráfica si se voltea el celular
+window.addEventListener('resize', () => {
+    procesar();
+});
+
 function procesar() {
     const gruposInputs = document.querySelectorAll('.input-group');
     const modo = document.getElementById('modo').value;
     const info = document.getElementById('info-box');
+    const contenedor = document.getElementById('contenedor-grafica');
     document.getElementById('grafica').innerHTML = "";
     
+    // Calculamos ancho dinámico basado en el contenedor real
+    const anchoDinamico = contenedor.offsetWidth - 20;
+
     let data = [];
     let funcionesValidas = [];
 
@@ -191,7 +197,6 @@ function procesar() {
             const colorValue = grupo.querySelector('.color-select').value;
             if(fnValue !== "") {
                 funcionesValidas.push({ fn: fnValue, color: colorValue });
-                // Siempre añadimos la línea base
                 data.push({ fn: fnValue, color: colorValue });
             }
         });
@@ -214,17 +219,14 @@ function procesar() {
         }
 
         if (modo === 'area_curva' && funcionesValidas.length >= 1) {
-            // Se sobreescribe la primera función para que tenga el área cerrada al eje X
             data[0].closed = true;
             info.innerHTML = "Área de la primera función respecto al eje X";
         }
 
-        // Lógica de 'area_entre' eliminada
-
         functionPlot({
             target: "#grafica",
-            width: 580,
-            height: 400,
+            width: anchoDinamico,
+            height: anchoDinamico * 0.7, // Altura proporcional al ancho
             grid: true,
             data: data
         });
@@ -236,6 +238,7 @@ function procesar() {
 
 function exportarImagen() {
     const svgElement = document.querySelector('#grafica svg');
+    if(!svgElement) return;
     const canvas = document.getElementById('canvas-export');
     const ctx = canvas.getContext('2d');
     const svgData = new XMLSerializer().serializeToString(svgElement);
@@ -264,8 +267,5 @@ function exportarImagen() {
     img.src = url;
 }
 </script>
-
-
-    
 </body>
 </html>
