@@ -1,5 +1,48 @@
-background: white; box-sizing: border-box; transition: 0.3s;
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graficadora Pro - Raiz Cuadrada</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Solve.js"></script>
+    <script src="https://unpkg.com/d3@3/d3.min.js"></script>
+    <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
+        .fade-in { opacity: 0; transform: translateY(25px); animation: fadeUp 0.9s ease forwards; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+
+        .calculadora-moderna {
+            max-width: 650px; width: 100%; padding: 40px 30px;
+            background: #F2F2F2; border-radius: 35px;
+            font-family: 'Open Sans', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .header-section { text-align: center; margin-bottom: 25px; }
+        .header-section h1 { font-size: 32px; margin: 0; font-family: 'Playfair Display', serif; }
+        .header-section p { font-size: 18px; font-weight: 600; color: #333; font-family: 'Playfair Display', serif; margin: 5px 0; }
+
+        label { display: block; font-size: 13px; margin-bottom: 8px; margin-left: 10px; font-weight: 600; }
+
+        .input-group {
+            display: flex; gap: 10px; position: relative;
+            margin-bottom: 12px; align-items: center; padding-right: 40px;
+        }
+
+        input, select {
+            font-family: 'Open Sans', sans-serif; font-size: 14px;
+            padding: 12px 15px; border: 1px solid #ccc; border-radius: 25px;
+            background: white; box-sizing: border-box; transition: 0.3s;
+        }
 
         /* --- ESTILO DEL SELECTOR DE COLOR COMO CÍRCULO --- */
         .input-group .color-select {
@@ -23,86 +66,204 @@ background: white; box-sizing: border-box; transition: 0.3s;
             /* El fondo se define en línea por JS */
         }
 
-.input-group .fn-input { flex-grow: 1; }
-        .input-group .color-select { width: 130px; flex-shrink: 0; cursor: pointer; }
+        .input-group .fn-input { flex-grow: 1; }
 
-.btn-remove { 
-position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-@@ -83,7 +104,7 @@ <h1>Graficadora Inteligente</h1>
-</div>
+        .btn-remove { 
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+            background: black; color: white; border: none; 
+            border-radius: 50%; width: 30px; height: 30px; 
+            cursor: pointer; font-size: 18px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-<div id="lista-funciones">
-            <label>Funciones f(x) y Color</label>
+        .botones-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .boton-estilo {
+            display: flex; align-items: center; justify-content: center;
+            background: white; border: 1px solid #ccc; border-radius: 30px;
+            padding: 12px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;
+        }
+        .boton-principal { background: black; color: white; border: none; }
+        .boton-secundario { background: #e0e0e0; border: none; }
+
+        #contenedor-grafica {
+            margin-top: 25px; background: white; border-radius: 25px;
+            padding: 10px; border: 1px solid #ddd; overflow: hidden;
+        }
+        #grafica { width: 100%; }
+        #info-box { text-align: center; margin-top: 10px; font-size: 12px; color: #666; font-weight: 600; }
+        #modo { width: 100%; margin-bottom: 0; }
+    </style>
+</head>
+<body>
+
+<div class="fade-in">
+    <div class="calculadora-moderna">
+        <div class="header-section">
+            <h1>Graficadora Inteligente</h1>
+            <p>√(Raiz) Cuadrada²</p>
+        </div>
+
+        <div id="lista-funciones">
             <label>Funciones f(x)</label>
-</div>
+        </div>
 
-<button onclick="agregarInput()" class="boton-estilo boton-secundario" style="width: 100%; margin-bottom: 15px; margin-top: 10px;">
-@@ -95,8 +116,7 @@ <h1>Graficadora Inteligente</h1>
-<option value="normal">Vista Normal</option>
-<option value="puntos">Máximos, Mínimos y Raíces</option>
-<option value="area_curva">Área Bajo la Curva (f1 al Eje X)</option>
-            <option value="area_entre">Área entre Funciones (f1 y f2)</option>
-        </select>
+        <button onclick="agregarInput()" class="boton-estilo boton-secundario" style="width: 100%; margin-bottom: 15px; margin-top: 10px;">
+            + Añadir otra función
+        </button>
+
+        <label>Modo de análisis</label>
+        <select id="modo">
+            <option value="normal">Vista Normal</option>
+            <option value="puntos">Máximos, Mínimos y Raíces</option>
+            <option value="area_curva">Área Bajo la Curva (f1 al Eje X)</option>
             </select>
 
-<div class="botones-container">
-<button onclick="procesar()" class="boton-estilo boton-principal">Actualizar Gráfica</button>
-@@ -129,7 +149,8 @@ <h1>Graficadora Inteligente</h1>
-let html = '';
-for (const [hex, nombre] of Object.entries(paletaElegante)) {
-const selected = hex === colorSeleccionado ? 'selected' : '';
-        html += `<option value="${hex}" ${selected}>${nombre}</option>`;
+        <div class="botones-container">
+            <button onclick="procesar()" class="boton-estilo boton-principal">Actualizar Gráfica</button>
+            <button onclick="exportarImagen()" class="boton-estilo">
+                <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="16" style="margin-right:8px"> 
+                Descargar PNG con Marca de Agua
+            </button>
+        </div>
+
+        <div id="contenedor-grafica">
+            <div id="grafica"></div>
+        </div>
+        <div id="info-box"></div>
+    </div>
+</div>
+
+<canvas id="canvas-export" style="display:none;"></canvas>
+
+<script>
+const paletaElegante = {
+    '#333333': 'Negro Carbón',
+    '#5D8AA8': 'Azul Acero',
+    '#6B8E23': 'Verde Oliva',
+    '#A52A2A': 'Rojo Vino',
+    '#7F5A8B': 'Púrpura Tenue',
+    '#B87333': 'Bronce Antiguo'
+};
+
+function generarOpcionesColor(colorSeleccionado) {
+    let html = '';
+    for (const [hex, nombre] of Object.entries(paletaElegante)) {
+        const selected = hex === colorSeleccionado ? 'selected' : '';
         // Usamos estilo en línea para el fondo y texto transparente
         html += `<option value="${hex}" ${selected} style="background-color: ${hex}; color: transparent;">${nombre}</option>`;
+    }
+    return html;
 }
-return html;
-}
-@@ -138,9 +159,12 @@ <h1>Graficadora Inteligente</h1>
-const container = document.getElementById('lista-funciones');
-const div = document.createElement('div');
-div.className = 'input-group';
+
+function agregarInput(valorInicial = '', colorInicial = '#333333') {
+    const container = document.getElementById('lista-funciones');
+    const div = document.createElement('div');
+    div.className = 'input-group';
     // Se añade style inline al select para el color inicial y un onchange para actualizarlo
-div.innerHTML = `
-       <input class="fn-input" placeholder="Ej: x^2" value="${valorInicial}">
-        <select class="color-select">${generarOpcionesColor(colorInicial)}</select>
+    div.innerHTML = `
+        <input class="fn-input" placeholder="Ej: x^2" value="${valorInicial}">
         <select class="color-select" style="background-color: ${colorInicial};" onchange="this.style.backgroundColor = this.value">
             ${generarOpcionesColor(colorInicial)}
         </select>
-       <button class="btn-remove" onclick="if(document.querySelectorAll('.input-group').length > 1) { this.parentElement.remove(); procesar(); }">×</button>
-   `;
-container.appendChild(div);
-@@ -167,10 +191,8 @@ <h1>Graficadora Inteligente</h1>
-const colorValue = grupo.querySelector('.color-select').value;
-if(fnValue !== "") {
-funcionesValidas.push({ fn: fnValue, color: colorValue });
-                // Solo añadimos la línea normal si NO estamos en modo área entre curvas (para evitar duplicados visuales)
-                if (modo !== 'area_entre') {
-                    data.push({ fn: fnValue, color: colorValue });
-                }
+        <button class="btn-remove" onclick="if(document.querySelectorAll('.input-group').length > 1) { this.parentElement.remove(); procesar(); }">×</button>
+    `;
+    container.appendChild(div);
+}
+
+window.onload = function() {
+    agregarInput('x^2', '#333333');
+    agregarInput('x + 2', '#5D8AA8');
+    procesar();
+};
+
+function procesar() {
+    const gruposInputs = document.querySelectorAll('.input-group');
+    const modo = document.getElementById('modo').value;
+    const info = document.getElementById('info-box');
+    document.getElementById('grafica').innerHTML = "";
+    
+    let data = [];
+    let funcionesValidas = [];
+
+    try {
+        gruposInputs.forEach((grupo) => {
+            const fnValue = grupo.querySelector('.fn-input').value.trim();
+            const colorValue = grupo.querySelector('.color-select').value;
+            if(fnValue !== "") {
+                funcionesValidas.push({ fn: fnValue, color: colorValue });
                 // Siempre añadimos la línea base
                 data.push({ fn: fnValue, color: colorValue });
-}
-});
+            }
+        });
 
-@@ -197,20 +219,7 @@ <h1>Graficadora Inteligente</h1>
-info.innerHTML = "Área de la primera función respecto al eje X";
-}
-
-        if (modo === 'area_entre' && funcionesValidas.length >= 2) {
-            // Sintaxis CORRECTA para área entre f1 y f2
-            // Añadimos las líneas por separado primero
-            data.push({ fn: funcionesValidas[0].fn, color: funcionesValidas[0].color });
-            data.push({ fn: funcionesValidas[1].fn, color: funcionesValidas[1].color });
-            // Añadimos el sombreado vinculando f1 a f2
-            data.push({
-                fn: funcionesValidas[0].fn,
-                area: { fn: funcionesValidas[1].fn },
-                color: 'rgba(0, 0, 0, 0.15)',
-                skipTip: true 
+        if (modo === 'puntos') {
+            funcionesValidas.forEach((item) => {
+                try {
+                    let der = nerdamer.diff(item.fn, 'x').toString();
+                    let criticos = nerdamer.solve(der, 'x').symbol.elements;
+                    criticos.forEach(c => {
+                        let x = parseFloat(c.multiplier.num.toString());
+                        let y = parseFloat(nerdamer(item.fn).evaluate({x: x}).toString());
+                        if(!isNaN(x) && !isNaN(y)) {
+                            data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: item.color, attr: { r: 6, stroke: 'black', 'stroke-width': 2 } });
+                        }
+                    });
+                } catch(e) {}
             });
-            info.innerHTML = "Sombreado entre f1 (negro) y f2 (azul)";
+            info.innerHTML = "Marcando puntos críticos y raíces";
         }
+
+        if (modo === 'area_curva' && funcionesValidas.length >= 1) {
+            // Se sobreescribe la primera función para que tenga el área cerrada al eje X
+            data[0].closed = true;
+            info.innerHTML = "Área de la primera función respecto al eje X";
+        }
+
         // Lógica de 'area_entre' eliminada
 
-functionPlot({
-target: "#grafica",
+        functionPlot({
+            target: "#grafica",
+            width: 580,
+            height: 400,
+            grid: true,
+            data: data
+        });
+
+    } catch (e) {
+        info.innerHTML = "<span style='color:red'>Error matemático</span>";
+    }
+}
+
+function exportarImagen() {
+    const svgElement = document.querySelector('#grafica svg');
+    const canvas = document.getElementById('canvas-export');
+    const ctx = canvas.getContext('2d');
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const img = new Image();
+    const svgSize = svgElement.getBoundingClientRect();
+    
+    canvas.width = svgSize.width * 2; 
+    canvas.height = svgSize.height * 2;
+    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = function() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.font = "bold 40px 'Playfair Display'";
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.textAlign = "right";
+        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
+        const link = document.createElement('a');
+        link.download = 'grafica-raiz-cuadrada.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+    img.src = url;
+}
+</script>
+
+</body>
+</html>
