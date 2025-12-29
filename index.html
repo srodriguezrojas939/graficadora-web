@@ -33,23 +33,56 @@
 
         label { display: block; font-size: 13px; margin-bottom: 8px; margin-left: 10px; font-weight: 600; }
 
-        .input-group { position: relative; margin-bottom: 12px; }
+        /* --- NUEVOS ESTILOS PARA LOS INPUTS Y SELECTORES --- */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            position: relative;
+            margin-bottom: 12px;
+            align-items: center;
+            padding-right: 40px; /* Espacio para el botón de borrar */
+        }
+
         input, select {
-            width: 100%; font-family: 'Open Sans', sans-serif; font-size: 14px;
+            font-family: 'Open Sans', sans-serif; font-size: 14px;
             padding: 12px 15px; border: 1px solid #ccc; border-radius: 25px;
             background: white; box-sizing: border-box; transition: 0.3s;
         }
 
-        /* Botón eliminar corregido: Negro, X blanca y más grande */
+        .input-group .fn-input {
+            flex-grow: 1; /* El input ocupa el espacio principal */
+        }
+
+        .input-group .color-select {
+            width: 120px; /* Ancho fijo para el selector de color */
+            flex-shrink: 0;
+            cursor: pointer;
+            appearance: none; /* Estilo moderno sin flecha nativa fea */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27292.4%27%20height%3D%27292.4%27%3E%3Cpath%20fill%3D%27%23333%27%20d%3D%27M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-13%205.4A17.6%2017.6%200%200%200%200%2087.2c0%205%201.8%209.3%205.4%2013l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%20100.3c3.6-3.6%205.4-7.8%205.4-12.8%200-5-1.8-9.3-5.4-13z%27%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 10px auto;
+            padding-right: 30px;
+        }
+        
+        /* Estilo para las opciones del select */
+        .color-select option {
+            padding: 10px;
+            font-weight: 600;
+        }
+
+        /* Botón eliminar (Estilo "Raiz Cuadrada") */
         .btn-remove { 
-            position: absolute; right: 10px; top: 6px; 
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
             background: black; color: white; border: none; 
             border-radius: 50%; width: 30px; height: 30px; 
             cursor: pointer; font-size: 18px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
-            line-height: 0;
+            line-height: 0; transition: 0.2s;
         }
+        .btn-remove:hover { background: #333; }
 
+        /* --- Resto de estilos --- */
         .botones-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .boton-estilo {
             display: flex; align-items: center; justify-content: center;
@@ -58,14 +91,14 @@
         }
         .boton-principal { background: black; color: white; border: none; }
         .boton-secundario { background: #e0e0e0; border: none; }
-
         #contenedor-grafica {
             margin-top: 25px; background: white; border-radius: 25px;
             padding: 10px; border: 1px solid #ddd; overflow: hidden;
         }
-
         #grafica { width: 100%; }
         #info-box { text-align: center; margin-top: 10px; font-size: 12px; color: #666; font-weight: 600; }
+        /* Selector de modo a ancho completo */
+        #modo { width: 100%; margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -78,16 +111,10 @@
         </div>
 
         <div id="lista-funciones">
-            <label>Funciones f(x)</label>
-            <div class="input-group">
-                <input class="fn-input" placeholder="Ej: x^2" value="x^2">
+            <label>Funciones f(x) y Color</label>
             </div>
-            <div class="input-group">
-                <input class="fn-input" placeholder="Ej: x + 2" value="x + 2">
-            </div>
-        </div>
 
-        <button onclick="agregarInput()" class="boton-estilo boton-secundario" style="width: 100%; margin-bottom: 15px;">
+        <button onclick="agregarInput()" class="boton-estilo boton-secundario" style="width: 100%; margin-bottom: 15px; margin-top: 10px;">
             + Añadir otra función
         </button>
 
@@ -117,40 +144,86 @@
 <canvas id="canvas-export" style="display:none;"></canvas>
 
 <script>
-function agregarInput() {
+// --- CONF: PALETA DE COLORES SOBRIOS Y ELEGANTES ---
+const paletaElegante = {
+    '#333333': 'Negro Carbón',
+    '#5D8AA8': 'Azul Acero',
+    '#6B8E23': 'Verde Oliva',
+    '#A52A2A': 'Rojo Vino',
+    '#7F5A8B': 'Púrpura Tenue',
+    '#B87333': 'Bronce Antiguo'
+};
+
+// Función auxiliar para generar las opciones del select de color
+function generarOpcionesColor(colorSeleccionado) {
+    let html = '';
+    for (const [hex, nombre] of Object.entries(paletaElegante)) {
+        const selected = hex === colorSeleccionado ? 'selected' : '';
+        // Usamos estilos en linea para que el dropdown muestre los colores
+        html += `<option value="${hex}" ${selected} style="background-color:${hex}; color:white;">${nombre}</option>`;
+    }
+    return html;
+}
+
+// Función principal para añadir inputs
+function agregarInput(valorInicial = '', colorInicial = '#333333') {
     const container = document.getElementById('lista-funciones');
     const div = document.createElement('div');
     div.className = 'input-group';
+    
+    const opcionesColorStr = generarOpcionesColor(colorInicial);
+
     div.innerHTML = `
-        <input class="fn-input" placeholder="Nueva función">
-        <button class="btn-remove" onclick="this.parentElement.remove()">×</button>
+        <input class="fn-input" placeholder="Ej: x^2, sin(x)" value="${valorInicial}">
+        <select class="color-select">
+            ${opcionesColorStr}
+        </select>
+        <button class="btn-remove" onclick="if(document.querySelectorAll('.input-group').length > 1) { this.parentElement.remove(); procesar(); } else { alert('Debe haber al menos una función'); }">×</button>
     `;
     container.appendChild(div);
 }
 
+// Inicializar con dos funciones de ejemplo
+window.onload = function() {
+    agregarInput('x^2', '#333333'); // Negro
+    agregarInput('x + 2', '#5D8AA8'); // Azul Acero
+    procesar();
+};
+
+
 function procesar() {
-    const inputs = document.querySelectorAll('.fn-input');
+    // Seleccionamos los grupos de inputs en lugar de solo los inputs de texto
+    const gruposInputs = document.querySelectorAll('.input-group');
     const modo = document.getElementById('modo').value;
     const info = document.getElementById('info-box');
     document.getElementById('grafica').innerHTML = "";
     
     let data = [];
-    let colores = ['#000000', '#2196F3', '#4CAF50', '#9C27B0', '#FF9800'];
 
     try {
         let funcionesValidas = [];
-        inputs.forEach((input, i) => {
-            if(input.value.trim() !== "") {
-                funcionesValidas.push(input.value.trim());
+        
+        // Iteramos sobre cada grupo para obtener su función y su color asociado
+        gruposInputs.forEach((grupo) => {
+            const fnValue = grupo.querySelector('.fn-input').value.trim();
+            const colorValue = grupo.querySelector('.color-select').value;
+
+            if(fnValue !== "") {
+                funcionesValidas.push(fnValue);
                 data.push({
-                    fn: input.value.trim(),
-                    color: colores[i % colores.length]
+                    fn: fnValue,
+                    color: colorValue // Usamos el color seleccionado manualmente
                 });
             }
         });
 
         if (modo === 'puntos') {
-            funcionesValidas.forEach((f) => {
+            // Lógica de puntos (usando el mismo color de la línea para los puntos)
+            gruposInputs.forEach((grupo) => {
+                 const f = grupo.querySelector('.fn-input').value.trim();
+                 const color = grupo.querySelector('.color-select').value;
+                 if(f === "") return;
+
                 try {
                     let der = nerdamer.diff(f, 'x').toString();
                     let criticos = nerdamer.solve(der, 'x').symbol.elements;
@@ -158,19 +231,20 @@ function procesar() {
                         let x = parseFloat(c.multiplier.num.toString());
                         let y = parseFloat(nerdamer(f).evaluate({x: x}).toString());
                         if(!isNaN(x) && !isNaN(y)) {
-                            data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: 'red', attr: { r: 6 } });
+                            // Usamos el mismo color de la función pero un poco más oscuro para el punto
+                            data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: color, attr: { r: 6, stroke: 'black', 'stroke-width': 2 } });
                         }
                     });
                     let raices = nerdamer.solve(f, 'x').symbol.elements;
                     raices.forEach(r => {
                         let x = parseFloat(r.multiplier.num.toString());
                         if(!isNaN(x)) {
-                            data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: 'blue', attr: { r: 6 } });
+                             data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: color, attr: { r: 5, opacity: 0.7 } });
                         }
                     });
                 } catch(e) {}
             });
-            info.innerHTML = "Puntos grandes: <span style='color:red'>Máx/Mín</span> | <span style='color:blue'>Raíces</span>";
+            info.innerHTML = "Puntos con borde: Máximos/Mínimos | Puntos sólidos: Raíces";
         }
 
         if (modo === 'area_curva' && funcionesValidas.length >= 1) {
@@ -183,7 +257,7 @@ function procesar() {
                 fn: funcionesValidas[0],
                 fnChild: funcionesValidas[1],
                 graphType: 'area',
-                color: 'rgba(0, 0, 0, 0.1)'
+                color: 'rgba(0, 0, 0, 0.1)' // Sombreado neutro para área entre curvas
             });
             info.innerHTML = "Área sombreada entre las dos primeras funciones";
         }
@@ -235,8 +309,6 @@ function exportarImagen() {
     };
     img.src = url;
 }
-
-window.onload = procesar;
 </script>
 
 </body>
