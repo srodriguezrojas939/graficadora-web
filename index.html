@@ -264,42 +264,6 @@ function exportarImagen() {
     img.src = url;
 }
 </script>
-
-
-    <style>
-  /* 1. Forzar que nada se salga del ancho de la pantalla */
-  html, body {
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow-x: hidden; /* Elimina el scroll horizontal */
-    box-sizing: border-box;
-  }
-
-  /* 2. Hacer que los contenedores principales sean flexibles */
-  .contenedor-principal, .main-container { /* Cambia esto por la clase que uses */
-    width: 100% !important;
-    max-width: 100vw !important;
-    padding: 10px !important; /* Margen pequeño para que no toque los bordes */
-    box-sizing: border-box;
-  }
-
-  /* 3. Ajustar el tamaño del título para que no se corte */
-  h1, .titulo { 
-    font-size: clamp(1.5rem, 5vw, 2.5rem) !important; 
-    word-wrap: break-word;
-  }
-
-  /* 4. Ajustar botones para que no sean gigantes */
-  button, .btn {
-    width: 100% !important;
-    max-width: 300px;
-    margin: 5px auto !important;
-    display: block;
-  }
-</style>
-
-
     
 </body>
 </html>
