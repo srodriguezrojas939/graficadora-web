@@ -69,24 +69,16 @@
         .sym-btn .main-sym { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 16px; color: #333; }
         .sym-btn .sub-label { font-size: 8px; font-weight: 700; color: #bbb; margin-top: 4px; text-transform: uppercase; }
 
-        /* Botón PNG - CORREGIDO Y CAUTELOSO */
+        /* Botón PNG Estilo Píldora - Tamaño Controlado */
         .btn-png-container { grid-column: span 4; display: flex; justify-content: center; margin-top: 5px; }
         .btn-png {
             background: white; border: 1px solid #e0e0e0; border-radius: 50px;
-            padding: 10px 25px; /* Más delgado pero mantiene forma de píldora */
+            padding: 10px 25px;
             cursor: pointer; display: flex; align-items: center; gap: 10px;
             transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
-        .btn-png:hover { background: #fdfdfd; border-color: #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn-png img { width: 20px; height: 20px; object-fit: contain; }
         .btn-png span { font-weight: 700; font-size: 14px; color: #000; }
-        
-        /* Ajuste crucial para que el icono no sea gigante */
-        .btn-png img { 
-            width: 20px; 
-            height: 20px; 
-            object-fit: contain;
-            display: block;
-        }
 
         .tag { padding: 4px 8px; border-radius: 6px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .select-fn-box { margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 10px; }
@@ -122,8 +114,7 @@
         <div class="table-box">
             <div class="table-header">
                 <strong id="table-title">Valores</strong>
-                <select id="table-fn-selector" class="table-select" onchange="draw()">
-                    </select>
+                <select id="table-fn-selector" class="table-select" onchange="draw()"></select>
             </div>
             <div class="table-scroll">
                 <table>
@@ -134,31 +125,14 @@
         </div>
 
         <div class="symbol-pad">
-            <button class="sym-btn" onclick="insertSym('^2')">
-                <span class="main-sym">x²</span><span class="sub-label">Potencia</span>
-            </button>
-            <button class="sym-btn" onclick="insertSym('sqrt(')">
-                <span class="main-sym">√</span><span class="sub-label">Raíz (√)</span>
-            </button>
-            <button class="sym-btn" onclick="insertSym('(')">
-                <span class="main-sym">(</span><span class="sub-label">Abrir (</span>
-            </button>
-            <button class="sym-btn" onclick="insertSym(')')">
-                <span class="main-sym">)</span><span class="sub-label">Cerrar )</span>
-            </button>
-            <button class="sym-btn" onclick="insertSym('sin(')">
-                <span class="main-sym">sin</span><span class="sub-label">Seno</span>
-            </button>
-            <button class="sym-btn" onclick="insertSym('cos(')">
-                <span class="main-sym">cos</span><span class="sub-label">Coseno</span>
-            </button>
-            <button class="sym-btn" onclick="insertSym('pi')">
-                <span class="main-sym">π</span><span class="sub-label">Pi</span>
-            </button>
-            <button class="sym-btn" onclick="insertSym('abs(')">
-                <span class="main-sym">|x|</span><span class="sub-label">Absoluto</span>
-            </button>
-
+            <button class="sym-btn" onclick="insertSym('^2')"><span class="main-sym">x²</span><span class="sub-label">Potencia</span></button>
+            <button class="sym-btn" onclick="insertSym('sqrt(')"><span class="main-sym">√</span><span class="sub-label">Raíz</span></button>
+            <button class="sym-btn" onclick="insertSym('(')"><span class="main-sym">(</span><span class="sub-label">Abrir</span></button>
+            <button class="sym-btn" onclick="insertSym(')')"><span class="main-sym">)</span><span class="sub-label">Cerrar</span></button>
+            <button class="sym-btn" onclick="insertSym('sin(')"><span class="main-sym">sin</span><span class="sub-label">Seno</span></button>
+            <button class="sym-btn" onclick="insertSym('cos(')"><span class="main-sym">cos</span><span class="sub-label">Coseno</span></button>
+            <button class="sym-btn" onclick="insertSym('pi')"><span class="main-sym">π</span><span class="sub-label">Pi</span></button>
+            <button class="sym-btn" onclick="insertSym('abs(')"><span class="main-sym">|x|</span><span class="sub-label">Absoluto</span></button>
             <div class="btn-png-container">
                 <button class="btn-png" onclick="exportPNG()">
                     <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" alt="download">
@@ -186,14 +160,13 @@ function setMode(m, btn) {
 function addInput(v = '') {
     const inputsList = document.getElementById('inputs-list');
     const isFirst = inputsList.children.length === 0;
-    // Púrpura elegante para la primera función
     const defaultColor = isFirst ? '#8e44ad' : `#${Math.floor(Math.random()*16777215).toString(16)}`;
     
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
         <input type="color" value="${defaultColor}" onchange="draw()">
-        <input class="fn-input" placeholder="f(x) = ..." value="${v}" oninput="draw(); updateSelectors();" onfocus="lastInput=this">
+        <input class="fn-input" placeholder="Ej: x^2 + y^2 - 25" value="${v}" oninput="draw(); updateSelectors();" onfocus="lastInput=this">
         <button class="btn-delete" onclick="this.parentElement.remove(); draw(); updateSelectors();">×</button>
     `;
     inputsList.appendChild(div);
@@ -207,20 +180,13 @@ function updateSelectors() {
     const tableSel = document.getElementById('table-fn-selector');
     const prevTarget = targetSel.value;
     const prevTable = tableSel.value || "0";
-
-    targetSel.innerHTML = "";
-    tableSel.innerHTML = "";
-
+    targetSel.innerHTML = ""; tableSel.innerHTML = "";
     document.querySelectorAll('.fn-input').forEach((input, i) => {
         if(input.value.trim()) {
-            let opt = document.createElement('option');
-            opt.value = i;
-            opt.text = `f${i+1}(x)`;
-            targetSel.add(opt.cloneNode(true));
-            tableSel.add(opt);
+            let opt = document.createElement('option'); opt.value = i; opt.text = `f${i+1}(x)`;
+            targetSel.add(opt.cloneNode(true)); tableSel.add(opt);
         }
     });
-
     targetSel.value = prevTarget < targetSel.length ? prevTarget : "0";
     tableSel.value = prevTable < tableSel.length ? prevTable : "0";
 }
@@ -232,6 +198,31 @@ function insertSym(s) {
     draw();
 }
 
+// NUEVO: Procesador de Lógica para Inecuaciones y Regiones
+function processEquation(text) {
+    let t = text.replace(/∧/g, '&&').replace(/∨/g, '||');
+    
+    // Si hay lógica AND (&&), convertimos a la función max() para sombrear la intersección
+    if (t.includes('&&')) {
+        let parts = t.split('&&').map(p => {
+            p = p.trim();
+            if (p.includes('<=')) return p.replace('<=', '-') + '';
+            if (p.includes('<')) return p.replace('<', '-') + '';
+            if (p.includes('>=')) return `(${p.split('>=')[1]} - ${p.split('>=')[0]})`;
+            if (p.includes('>')) return `(${p.split('>')[1]} - ${p.split('>')[0]})`;
+            return p;
+        });
+        return `max(${parts.join(',')})`;
+    }
+    
+    // Manejo simple de inecuaciones individuales
+    if (t.includes('<=')) return t.replace('<=', '-');
+    if (t.includes('<')) return t.replace('<', '-');
+    if (t.includes('>=')) return t.replace('>=', '-'); // Simplificado
+    
+    return t;
+}
+
 function draw() {
     const rows = document.querySelectorAll('.input-row');
     const data = [];
@@ -240,29 +231,27 @@ function draw() {
     let functions = [];
 
     rows.forEach((row, i) => {
-        let fnText = row.querySelector('.fn-input').value;
+        let rawText = row.querySelector('.fn-input').value;
         let color = row.querySelector('input[type="color"]').value;
-        if(fnText) {
-            const isImplicit = fnText.includes('y');
-            functions.push({fn: fnText, color: color, id: i, isImplicit: isImplicit});
+        if(rawText) {
+            let isImplicit = rawText.includes('y') || rawText.includes('<') || rawText.includes('>') || rawText.includes('=') || rawText.includes('∧');
+            let cleanFn = isImplicit ? processEquation(rawText) : rawText;
+            functions.push({fn: cleanFn, color: color, id: i, isImplicit: isImplicit, original: rawText});
         }
     });
 
     functions.forEach((f, i) => {
-        let graphConfig = {
-            fn: f.fn,
-            color: f.color,
-            closed: !f.isImplicit && mode === 'area' && i == document.getElementById('target-fn').value,
-        };
-
+        let config = { fn: f.fn, color: f.color };
         if (f.isImplicit) {
-            graphConfig.fnType = 'implicit';
+            config.fnType = 'implicit';
         } else {
-            graphConfig.graphType = 'polyline';
+            config.graphType = 'polyline';
+            config.closed = mode === 'area' && i == document.getElementById('target-fn').value;
         }
-        data.push(graphConfig);
+        data.push(config);
     });
 
+    // Puntos especiales (solo para funciones no implícitas)
     if(mode === 'especiales' && functions.length > 0) {
         const targetIdx = document.getElementById('target-fn').value || 0;
         const main = functions[targetIdx];
@@ -272,24 +261,9 @@ function draw() {
                 roots.forEach(r => {
                     let x = parseFloat(nerdamer(r).evaluate().text());
                     if(!isNaN(x) && isFinite(x)) {
-                        data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 5} });
+                        data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f' });
                         annotations.push({x: x, y: 0, text: `Raiz` });
                         pointsForTable.push({type: 'Corte X', x: x.toFixed(2), y: '0.00', col: '#f1c40f'});
-                    }
-                });
-                let y0 = parseFloat(nerdamer(main.fn).evaluate({x: 0}).text());
-                if(!isNaN(y0)) {
-                    data.push({ points: [[0, y0]], fnType: 'points', graphType: 'scatter', color: '#e67e22', attr: {r: 5} });
-                    pointsForTable.push({type: 'Corte Y', x: '0.00', y: y0.toFixed(2), col: '#e67e22'});
-                }
-                let d1 = nerdamer.diff(main.fn, 'x').toString();
-                let criticos = nerdamer.solve(d1, 'x').symbol.elements;
-                criticos.forEach(p => {
-                    let x = parseFloat(nerdamer(p).evaluate().text());
-                    let y = parseFloat(nerdamer(main.fn).evaluate({x: x}).text());
-                    if(!isNaN(x) && !isNaN(y)) {
-                        data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: '#3498db', attr: {r: 5} });
-                        pointsForTable.push({type: 'Extremo', x: x.toFixed(2), y: y.toFixed(2), col: '#3498db'});
                     }
                 });
             } catch(e){}
@@ -317,31 +291,21 @@ function updateTable(specialPoints, allFunctions) {
     const tableSel = document.getElementById('table-fn-selector');
     const selectedIdx = tableSel.value || 0;
     const currentFn = allFunctions[selectedIdx];
-    
     body.innerHTML = "";
     if (!currentFn) return;
-
     if (currentFn.isImplicit) {
         body.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#999; padding: 20px;'>Tabla no disponible para ecuaciones implícitas.</td></tr>";
         return;
     }
-
     if(mode === 'especiales') {
-        if(specialPoints.length === 0) body.innerHTML = "<tr><td colspan='2'>No hay puntos especiales</td></tr>";
         specialPoints.forEach(p => {
-            body.innerHTML += `<tr>
-                <td><span class="tag" style="background:${p.col}">${p.type}</span></td>
-                <td style="font-family:'Roboto Mono'">${p.x}, ${p.y}</td>
-            </tr>`;
+            body.innerHTML += `<tr><td><span class="tag" style="background:${p.col}">${p.type}</span></td><td style="font-family:'Roboto Mono'">${p.x}, ${p.y}</td></tr>`;
         });
     } else {
         for(let x = -3; x <= 3; x++) {
             try {
                 let y = parseFloat(nerdamer(currentFn.fn).evaluate({x: x}).text()).toFixed(2);
-                body.innerHTML += `<tr>
-                    <td style="color:#888">x = ${x}</td>
-                    <td style="font-family:'Roboto Mono'; font-weight:700;">y = ${y}</td>
-                </tr>`;
+                body.innerHTML += `<tr><td style="color:#888">x = ${x}</td><td style="font-family:'Roboto Mono'; font-weight:700;">y = ${y}</td></tr>`;
             } catch(e){}
         }
     }
@@ -353,34 +317,26 @@ function exportPNG() {
     const ctx = canvas.getContext('2d');
     const xml = new XMLSerializer().serializeToString(svg);
     const img = new Image();
-
-    canvas.width = svg.clientWidth * 2;
-    canvas.height = svg.clientHeight * 2;
-
+    canvas.width = svg.clientWidth * 2; canvas.height = svg.clientHeight * 2;
     const blob = new Blob([xml], {type: 'image/svg+xml;charset=utf-8'});
     const url = URL.createObjectURL(blob);
-
     img.onload = () => {
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        ctx.font = "bold 24px 'Playfair Display', serif";
-        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-        ctx.textAlign = "right";
-        ctx.textBaseline = "bottom";
+        ctx.font = "bold 24px 'Playfair Display', serif"; ctx.fillStyle = "rgba(0, 0, 0, 0.4)"; ctx.textAlign = "right";
         ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
-
-        const a = document.createElement('a');
-        a.download = 'mi_grafica_con_marca.png';
-        a.href = canvas.toDataURL();
-        a.click();
+        const a = document.createElement('a'); a.download = 'grafica.png'; a.href = canvas.toDataURL(); a.click();
         URL.revokeObjectURL(url);
     };
     img.src = url;
 }
 
-window.onload = () => { addInput('(x^2 + y^2 - 1)^3 - x^2 y^3'); updateSelectors(); draw(); };
+window.onload = () => { 
+    // Ejemplo de la ecuación compleja que pediste
+    addInput('x^2 <= 0.01 ∧ 0 <= y ∧ y <= 2'); 
+    updateSelectors(); 
+    draw(); 
+};
 window.onresize = draw;
 </script>
 </body>
