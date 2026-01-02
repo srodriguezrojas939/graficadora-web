@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graficadora 2D - Puntos Especiales</title>
+    <title>Graficadora 2D Pro - Puntos Especiales</title>
 
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
@@ -18,7 +18,7 @@
         body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Open Sans', sans-serif; }
         
         .calculadora-moderna {
-            max-width: 750px; width: 100%; padding: 40px 30px;
+            max-width: 850px; width: 100%; padding: 40px 30px;
             background: #F2F2F2; border-radius: 35px;
             box-shadow: 0 15px 50px rgba(0,0,0,0.05);
             text-align: center;
@@ -31,51 +31,32 @@
         .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 15px; }
         input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
 
-        #sliders-container { 
-            display: none; grid-template-columns: repeat(3, 1fr); gap: 15px; 
-            margin: 20px 0; background: #e9e9e9; padding: 15px; border-radius: 20px; 
-        }
-
-        /* ESTÉTICA DE PÍLDORAS */
+        /* Píldoras Estilo Imagen */
         .pills-nav-container {
-            background: #E0E0E0;
-            padding: 6px;
-            border-radius: 50px;
-            display: flex;
-            gap: 5px;
-            margin: 25px 0;
-            border: 1px solid #D1D1D1;
+            background: #E0E0E0; padding: 6px; border-radius: 50px;
+            display: flex; gap: 5px; margin: 25px 0; border: 1px solid #D1D1D1;
         }
         .pill-btn {
-            background: transparent;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #555;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
+            background: transparent; border: none; padding: 12px 20px;
+            border-radius: 40px; font-size: 13px; font-weight: 600; color: #555;
+            cursor: pointer; transition: 0.3s; flex: 1;
         }
-        .pill-btn.active {
-            background: white;
-            color: black;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            font-weight: 700;
-        }
+        .pill-btn.active { background: white; color: black; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 700; }
 
-        #grafica-wrapper { background: white; border-radius: 30px; height: 450px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 20px; }
+        /* Selector de Función para Análisis */
+        .select-fn-box { margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 10px; }
+        select { padding: 8px 15px; border-radius: 15px; border: 1px solid #ccc; font-weight: bold; }
+
+        #grafica-wrapper { background: white; border-radius: 30px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 20px; }
         
-        .boton-descarga { background: white; border: 1px solid #ccc; border-radius: 30px; padding: 12px 25px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-
         .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
         .symbol-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .sym-btn { background: white; border: 1px solid #ccc; padding: 10px; border-radius: 12px; cursor: pointer; font-family: 'Roboto Mono', monospace; font-weight: bold; font-size: 12px; }
-        .table-box { background: white; border-radius: 20px; padding: 15px; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; }
-        table { width: 100%; font-size: 12px; border-collapse: collapse; }
-        td, th { padding: 6px; border-bottom: 1px solid #eee; }
+        .table-box { background: white; border-radius: 20px; padding: 15px; border: 1px solid #ccc; max-height: 250px; overflow-y: auto; }
+        table { width: 100%; font-size: 11px; border-collapse: collapse; }
+        td, th { padding: 8px; border-bottom: 1px solid #eee; }
 
+        .tag { padding: 2px 6px; border-radius: 5px; color: white; font-size: 9px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -87,23 +68,18 @@
     </div>
 
     <div id="inputs-list"></div>
-    <button onclick="addInput()" style="background:none; border:2px dashed #bbb; width:100%; padding:10px; border-radius:20px; cursor:pointer; font-weight:bold; color:#666; margin-bottom:15px;">+ Añadir Función</button>
-
-    <div id="sliders-container">
-        <div class="slider-item"><label>a: <span id="va">1</span></label><input type="range" id="sa" min="-5" max="5" step="0.1" value="1" oninput="draw()"></div>
-        <div class="slider-item"><label>b: <span id="vb">0</span></label><input type="range" id="sb" min="-5" max="5" step="0.1" value="0" oninput="draw()"></div>
-        <div class="slider-item"><label>c: <span id="vc">0</span></label><input type="range" id="sc" min="-5" max="5" step="0.1" value="0" oninput="draw()"></div>
-    </div>
+    <button onclick="addInput()" style="background:none; border:2px dashed #bbb; width:100%; padding:10px; border-radius:20px; cursor:pointer; font-weight:bold; color:#666; margin-bottom:15px;">+ Añadir f(x)</button>
 
     <div class="pills-nav-container">
         <button class="pill-btn active" onclick="setMode('normal', this)">Vista Normal</button>
         <button class="pill-btn" onclick="setMode('especiales', this)">Puntos especiales</button>
-        <button class="pill-btn" onclick="setMode('area_curva', this)">Área bajo curva</button>
+        <button class="pill-btn" onclick="setMode('area', this)">Área bajo curva</button>
     </div>
 
-    <button class="boton-descarga" onclick="exportPNG()">
-        <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="15"> Descargar en PNG
-    </button>
+    <div id="select-fn-container" class="select-fn-box">
+        <label style="font-size: 12px; font-weight: bold;">Analizar:</label>
+        <select id="target-fn" onchange="draw()"></select>
+    </div>
 
     <div id="grafica-wrapper">
         <div id="grafica"></div>
@@ -111,8 +87,9 @@
 
     <div class="bottom-grid">
         <div class="table-box">
-            <table>
-                <thead><tr><th>x</th><th>f(x)</th></tr></thead>
+            <strong id="table-title">Valores</strong>
+            <table id="data-table">
+                <thead><tr><th>Punto</th><th>Coordenada (x, y)</th></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
@@ -121,10 +98,12 @@
             <button class="sym-btn" onclick="insertSym('sqrt(')">√</button>
             <button class="sym-btn" onclick="insertSym('sin(')">sin</button>
             <button class="sym-btn" onclick="insertSym('cos(')">cos</button>
-            <button class="sym-btn" onclick="insertSym(' > ')">></button>
-            <button class="sym-btn" onclick="insertSym(' < ')"><</button>
             <button class="sym-btn" onclick="insertSym('pi')">π</button>
             <button class="sym-btn" onclick="insertSym('abs(')">|x|</button>
+            <button class="sym-btn" onclick="insertSym('log(')">log</button>
+            <button class="sym-btn" onclick="insertSym('(')">(</button>
+            <button class="sym-btn" onclick="insertSym(')')">)</button>
+            <button class="sym-btn" onclick="exportPNG()" style="grid-column: span 2; background: #333; color: white;">Descargar PNG</button>
         </div>
     </div>
 </div>
@@ -139,19 +118,38 @@ function setMode(m, btn) {
     mode = m;
     document.querySelectorAll('.pill-btn').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
+    document.getElementById('select-fn-container').style.display = (m === 'especiales' || m === 'area') ? 'flex' : 'none';
     draw();
 }
 
-function addInput(v = '', c = '#333') {
+function addInput(v = '') {
+    const id = Date.now();
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="color" value="${c}" onchange="draw()">
-        <input class="fn-input" placeholder="Ej: x^2 - 4" value="${v}" oninput="draw()" onfocus="lastInput=this">
-        <button onclick="this.parentElement.remove(); draw()" style="border:none; background:none; cursor:pointer;">×</button>
+        <input type="color" value="#${Math.floor(Math.random()*16777215).toString(16)}" onchange="draw()">
+        <input class="fn-input" placeholder="Escribe una función..." value="${v}" oninput="draw(); updateSelector();" onfocus="lastInput=this">
+        <button onclick="this.parentElement.remove(); draw(); updateSelector();">×</button>
     `;
     document.getElementById('inputs-list').appendChild(div);
     if(!lastInput) lastInput = div.querySelector('.fn-input');
+    updateSelector();
+    draw();
+}
+
+function updateSelector() {
+    const sel = document.getElementById('target-fn');
+    const currentVal = sel.value;
+    sel.innerHTML = "";
+    document.querySelectorAll('.fn-input').forEach((input, i) => {
+        if(input.value.trim()) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.text = `Función f${i+1}`;
+            sel.add(opt);
+        }
+    });
+    if(currentVal < sel.length) sel.value = currentVal;
 }
 
 function insertSym(s) {
@@ -162,117 +160,139 @@ function insertSym(s) {
 }
 
 function draw() {
-    const a = document.getElementById('sa').value;
-    const b = document.getElementById('sb').value;
-    const c = document.getElementById('sc').value;
-    document.getElementById('va').innerText = a;
-    document.getElementById('vb').innerText = b;
-    document.getElementById('vc').innerText = c;
-
     const rows = document.querySelectorAll('.input-row');
     const data = [];
     const annotations = [];
-    let showSliders = false;
+    const pointsList = []; // Para la tabla
     let functions = [];
 
     rows.forEach((row, i) => {
-        let raw = row.querySelector('.fn-input').value;
-        let col = row.querySelector('input[type="color"]').value;
-        if(!raw) return;
+        let fnText = row.querySelector('.fn-input').value;
+        let color = row.querySelector('input[type="color"]').value;
+        if(fnText) functions.push({fn: fnText, color: color, id: i});
+    });
 
-        if(/[abc]/.test(raw)) showSliders = true;
-        let clean = raw.replace(/a/g, `(${a})`).replace(/b/g, `(${b})`).replace(/c/g, `(${c})`);
-        functions.push({fn: clean, color: col});
-
+    functions.forEach((f, i) => {
         data.push({
-            fn: clean, color: col,
-            closed: mode === 'area_curva' && i === 0,
+            fn: f.fn, color: f.color,
+            closed: mode === 'area' && i == document.getElementById('target-fn').value,
             graphType: 'polyline'
         });
     });
 
-    document.getElementById('sliders-container').style.display = showSliders ? 'grid' : 'none';
-
     if(mode === 'especiales' && functions.length > 0) {
-        const f1 = functions[0].fn;
+        const targetIdx = document.getElementById('target-fn').value || 0;
+        const main = functions[targetIdx];
+        const f1 = main.fn;
 
         try {
-            // 1. CORTES EJE X (AMARILLO)
+            // 1. CORTES EJE X (RAÍCES) - AMARILLO
             let roots = nerdamer.solve(f1, 'x').symbol.elements;
-            roots.forEach(r => {
+            roots.slice(0, 6).forEach(r => {
                 let x = parseFloat(nerdamer(r).evaluate());
                 if(!isNaN(x)) {
-                    data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 6} });
-                    annotations.push({x: x, y: 0, text: `Eje X: (${x.toFixed(2)}, 0)`});
+                    data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 7} });
+                    annotations.push({x: x, y: 0, text: `(${x.toFixed(2)}, 0)`});
+                    pointsList.push({type: 'Corte X', val: `(${x.toFixed(2)}, 0)`, col: '#f1c40f'});
                 }
             });
 
-            // 2. CORTE EJE Y (AMARILLO)
+            // 2. CORTE EJE Y - AMARILLO
             let y0 = parseFloat(nerdamer(f1).evaluate({x: 0}));
             if(!isNaN(y0)) {
-                data.push({ points: [[0, y0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 6} });
-                annotations.push({x: 0, y: y0, text: `Eje Y: (0, ${y0.toFixed(2)})`});
+                data.push({ points: [[0, y0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 7} });
+                annotations.push({x: 0, y: y0, text: `(0, ${y0.toFixed(2)})`});
+                pointsList.push({type: 'Corte Y', val: `(0, ${y0.toFixed(2)})`, col: '#f1c40f'});
             }
 
-            // 3. MÁXIMOS Y MÍNIMOS (AZUL Y ROJO)
-            let der1 = nerdamer.diff(f1, 'x').toString();
-            let der2 = nerdamer.diff(der1, 'x').toString();
-            let critical = nerdamer.solve(der1, 'x').symbol.elements;
+            // 3. MÁXIMOS Y MÍNIMOS (Derivadas)
+            let d1 = nerdamer.diff(f1, 'x').toString();
+            let d2 = nerdamer.diff(d1, 'x').toString();
+            let criticos = nerdamer.solve(d1, 'x').symbol.elements;
             
-            critical.forEach(p => {
+            let maxs = [], mins = [];
+            criticos.forEach(p => {
                 let x = parseFloat(nerdamer(p).evaluate());
                 let y = parseFloat(nerdamer(f1).evaluate({x: x}));
-                let secondDeriv = parseFloat(nerdamer(der2).evaluate({x: x}));
-
+                let curbatura = parseFloat(nerdamer(d2).evaluate({x: x}));
                 if(!isNaN(x) && !isNaN(y)) {
-                    let color = secondDeriv < 0 ? '#3498db' : '#e74c3c'; // Azul si es Max, Rojo si es Min
-                    let label = secondDeriv < 0 ? 'Máx' : 'Mín';
-                    data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: color, attr: {r: 7} });
-                    annotations.push({x: x, y: y, text: `${label}: (${x.toFixed(2)}, ${y.toFixed(2)})`});
+                    if(curbatura < 0) maxs.push([x, y]);
+                    else mins.push([x, y]);
                 }
             });
 
-            // 4. INTERSECCIÓN ENTRE F1 Y F2 (MORADO)
-            if(functions.length >= 2) {
-                let f2 = functions[1].fn;
-                let inters = nerdamer.solve(`${f1} = ${f2}`, 'x').symbol.elements;
-                inters.forEach(pt => {
-                    let x = parseFloat(nerdamer(pt).evaluate());
-                    let y = parseFloat(nerdamer(f1).evaluate({x: x}));
-                    if(!isNaN(x)) {
-                        data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: '#9b59b6', attr: {r: 6} });
-                        annotations.push({x: x, y: y, text: `Cruce: (${x.toFixed(2)}, ${y.toFixed(2)})`});
-                    }
-                });
-            }
+            maxs.sort((a,b) => Math.abs(a[0]) - Math.abs(b[0])).slice(0,6).forEach(p => {
+                data.push({ points: [p], fnType: 'points', graphType: 'scatter', color: '#3498db', attr: {r: 8} });
+                annotations.push({x: p[0], y: p[1], text: `MÁX: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`});
+                pointsList.push({type: 'Máximo', val: `(${p[0].toFixed(2)}, ${p[1].toFixed(2)})`, col: '#3498db'});
+            });
 
-        } catch(e) { console.log("Error de cálculo"); }
+            mins.sort((a,b) => Math.abs(a[0]) - Math.abs(b[0])).slice(0,6).forEach(p => {
+                data.push({ points: [p], fnType: 'points', graphType: 'scatter', color: '#e74c3c', attr: {r: 8} });
+                annotations.push({x: p[0], y: p[1], text: `MÍN: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`});
+                pointsList.push({type: 'Mínimo', val: `(${p[0].toFixed(2)}, ${p[1].toFixed(2)})`, col: '#e74c3c'});
+            });
+
+            // 4. INTERSECCIONES (Cruces entre funciones) - MORADO
+            functions.forEach((other, idx) => {
+                if(idx != targetIdx) {
+                    let inters = nerdamer.solve(`${f1} = ${other.fn}`, 'x').symbol.elements;
+                    inters.slice(0, 6).forEach(pt => {
+                        let x = parseFloat(nerdamer(pt).evaluate());
+                        let y = parseFloat(nerdamer(f1).evaluate({x: x}));
+                        if(!isNaN(x)) {
+                            data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: '#9b59b6', attr: {r: 7} });
+                            annotations.push({x: x, y: y, text: `Cruce: (${x.toFixed(2)}, ${y.toFixed(2)})`});
+                            pointsList.push({type: 'Cruce', val: `(${x.toFixed(2)}, ${y.toFixed(2)})`, col: '#9b59b6'});
+                        }
+                    });
+                }
+            });
+
+        } catch(e) {}
     }
 
+    const wrapper = document.getElementById('grafica-wrapper');
     functionPlot({
         target: '#grafica',
-        width: document.getElementById('grafica-wrapper').offsetWidth,
-        height: 450,
+        width: wrapper.offsetWidth,
+        height: 500,
         grid: true,
         xAxis: { domain: [-10, 10] },
         yAxis: { domain: [-10, 10] },
+        tip: {
+            xLine: true, yLine: true,
+            renderer: function(x, y) { return `(${x.toFixed(2)}, ${y.toFixed(2)})`; }
+        },
         data: data,
-        annotations: annotations,
-        disableZoom: false
+        annotations: annotations
     });
 
-    updateTable(functions[0]?.fn);
+    updateTable(pointsList, functions[document.getElementById('target-fn').value]?.fn);
 }
 
-function updateTable(fn) {
+function updateTable(points, currentFn) {
     const body = document.getElementById('table-body');
+    const title = document.getElementById('table-title');
     body.innerHTML = "";
-    if(!fn || /[><]/.test(fn)) return;
-    for(let x = -3; x <= 3; x++) {
-        try {
-            let y = parseFloat(nerdamer(fn).evaluate({x: x})).toFixed(2);
-            body.innerHTML += `<tr><td>${x}</td><td>${y}</td></tr>`;
-        } catch(e){}
+
+    if(mode === 'especiales') {
+        title.innerText = "Puntos Especiales Detectados";
+        points.forEach(p => {
+            body.innerHTML += `<tr>
+                <td><span class="tag" style="background:${p.col}">${p.type}</span></td>
+                <td style="font-family:'Roboto Mono'">${p.val}</td>
+            </tr>`;
+        });
+    } else {
+        title.innerText = "Muestra de Valores (x, y)";
+        if(!currentFn) return;
+        for(let x = -2; x <= 2; x += 1) {
+            try {
+                let y = parseFloat(nerdamer(currentFn).evaluate({x: x})).toFixed(2);
+                body.innerHTML += `<tr><td>x = ${x}</td><td>y = ${y}</td></tr>`;
+            } catch(e){}
+        }
     }
 }
 
@@ -280,11 +300,11 @@ function exportPNG() {
     const svg = document.querySelector('#grafica svg');
     const canvas = document.getElementById('export-canvas');
     const ctx = canvas.getContext('2d');
-    const data = new XMLSerializer().serializeToString(svg);
+    const xml = new XMLSerializer().serializeToString(svg);
     const img = new Image();
     canvas.width = svg.clientWidth * 2;
     canvas.height = svg.clientHeight * 2;
-    const blob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+    const blob = new Blob([xml], {type: 'image/svg+xml;charset=utf-8'});
     const url = URL.createObjectURL(blob);
     img.onload = () => {
         ctx.fillStyle = "white";
@@ -295,14 +315,14 @@ function exportPNG() {
         ctx.textAlign = "right";
         ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
         const a = document.createElement('a');
-        a.download = 'grafica_puntos_especiales.png';
+        a.download = 'grafica_raiz_cuadrada.png';
         a.href = canvas.toDataURL();
         a.click();
     };
     img.src = url;
 }
 
-window.onload = () => { addInput('x^2 - 4'); draw(); };
+window.onload = () => { addInput('x^2 - 4'); addInput('2*x'); draw(); };
 window.onresize = draw;
 </script>
 </body>
