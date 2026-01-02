@@ -27,14 +27,12 @@
         .header-section h1 { font-family: 'Playfair Display', serif; font-size: 32px; margin: 0; }
         .header-section p { font-family: 'Playfair Display', serif; font-size: 18px; color: #444; margin: 5px 0 25px 0; }
 
-        /* Inputs y Botón de borrar minimalista */
         .input-row { display: flex; gap: 12px; align-items: center; background: white; padding: 10px 20px; border-radius: 20px; border: 1px solid #ddd; margin-bottom: 12px; }
         .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 15px; }
         .btn-delete { background: none; border: none; color: #bbb; font-size: 22px; cursor: pointer; transition: 0.2s; padding: 0 5px; }
         .btn-delete:hover { color: #888; }
         input[type="color"] { border: none; width: 25px; height: 25px; cursor: pointer; background: none; border-radius: 50%; overflow: hidden; }
 
-        /* Píldoras de Navegación */
         .pills-nav-container {
             background: #E0E0E0; padding: 6px; border-radius: 50px;
             display: flex; gap: 5px; margin: 25px 0; border: 1px solid #D1D1D1;
@@ -48,10 +46,8 @@
 
         #grafica-wrapper { background: white; border-radius: 35px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 25px; }
         
-        /* Grid inferior: Tabla y Panel en columna */
         .bottom-grid { display: flex; flex-direction: column; gap: 25px; }
 
-        /* Estética de la Tabla con Selector */
         .table-box { background: white; border-radius: 25px; padding: 20px; border: 1px solid #ccc; max-height: 350px; display: flex; flex-direction: column; }
         .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f2f2f2; padding-bottom: 10px; }
         .table-header strong { font-size: 14px; color: #333; }
@@ -62,7 +58,6 @@
         td, th { padding: 10px 8px; border-bottom: 1px solid #f9f9f9; text-align: left; }
         th { color: #999; font-weight: 600; font-size: 10px; text-transform: uppercase; }
 
-        /* Panel de Símbolos */
         .symbol-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .sym-btn { 
             background: white; border: none; border-radius: 18px; padding: 12px 5px;
@@ -74,17 +69,24 @@
         .sym-btn .main-sym { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 16px; color: #333; }
         .sym-btn .sub-label { font-size: 8px; font-weight: 700; color: #bbb; margin-top: 4px; text-transform: uppercase; }
 
-        /* Botón PNG (MODIFICADO: Estilo píldora grande) */
-        .btn-png-container { grid-column: span 4; display: flex; justify-content: center; margin-top: 10px; }
+        /* Botón PNG - CORREGIDO Y CAUTELOSO */
+        .btn-png-container { grid-column: span 4; display: flex; justify-content: center; margin-top: 5px; }
         .btn-png {
             background: white; border: 1px solid #e0e0e0; border-radius: 50px;
-            padding: 12px 30px; /* Aumentado el padding para que sea grueso como las píldoras */
-            cursor: pointer; display: flex; align-items: center; gap: 12px;
-            transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 10px 25px; /* Más delgado pero mantiene forma de píldora */
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
+            transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
-        .btn-png:hover { background: #fdfdfd; border-color: #ccc; box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
-        .btn-png span { font-weight: 700; font-size: 15px; color: #000; } /* Texto más grande */
-        .btn-png svg { width: 24px; height: 24px; stroke: #000; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; } /* Icono más grande */
+        .btn-png:hover { background: #fdfdfd; border-color: #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn-png span { font-weight: 700; font-size: 14px; color: #000; }
+        
+        /* Ajuste crucial para que el icono no sea gigante */
+        .btn-png img { 
+            width: 20px; 
+            height: 20px; 
+            object-fit: contain;
+            display: block;
+        }
 
         .tag { padding: 4px 8px; border-radius: 6px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .select-fn-box { margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 10px; }
@@ -184,6 +186,7 @@ function setMode(m, btn) {
 function addInput(v = '') {
     const inputsList = document.getElementById('inputs-list');
     const isFirst = inputsList.children.length === 0;
+    // Púrpura elegante para la primera función
     const defaultColor = isFirst ? '#8e44ad' : `#${Math.floor(Math.random()*16777215).toString(16)}`;
     
     const div = document.createElement('div');
@@ -202,7 +205,6 @@ function addInput(v = '') {
 function updateSelectors() {
     const targetSel = document.getElementById('target-fn');
     const tableSel = document.getElementById('table-fn-selector');
-    
     const prevTarget = targetSel.value;
     const prevTable = tableSel.value || "0";
 
@@ -241,7 +243,6 @@ function draw() {
         let fnText = row.querySelector('.fn-input').value;
         let color = row.querySelector('input[type="color"]').value;
         if(fnText) {
-            // Detectar si es implícita (si contiene la letra 'y')
             const isImplicit = fnText.includes('y');
             functions.push({fn: fnText, color: color, id: i, isImplicit: isImplicit});
         }
@@ -251,25 +252,20 @@ function draw() {
         let graphConfig = {
             fn: f.fn,
             color: f.color,
-            // Solo cerrar área si NO es implícita y estamos en modo área
             closed: !f.isImplicit && mode === 'area' && i == document.getElementById('target-fn').value,
         };
 
         if (f.isImplicit) {
-            // Configuración para ecuaciones implícitas (círculos, corazones, etc.)
             graphConfig.fnType = 'implicit';
         } else {
-            // Configuración para funciones normales
             graphConfig.graphType = 'polyline';
         }
         data.push(graphConfig);
     });
 
-    // Puntos Especiales (Solo para funciones explícitas)
     if(mode === 'especiales' && functions.length > 0) {
         const targetIdx = document.getElementById('target-fn').value || 0;
         const main = functions[targetIdx];
-        // Verificar que existe y NO es implícita antes de usar nerdamer
         if(main && !main.isImplicit) {
             try {
                 let roots = nerdamer.solve(main.fn, 'x').symbol.elements;
@@ -323,10 +319,8 @@ function updateTable(specialPoints, allFunctions) {
     const currentFn = allFunctions[selectedIdx];
     
     body.innerHTML = "";
-
     if (!currentFn) return;
 
-    // Si la función seleccionada es implícita, mostrar mensaje
     if (currentFn.isImplicit) {
         body.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#999; padding: 20px;'>Tabla no disponible para ecuaciones implícitas.</td></tr>";
         return;
@@ -386,7 +380,6 @@ function exportPNG() {
     img.src = url;
 }
 
-// Iniciar con una ecuación implícita de ejemplo (Círculo)
 window.onload = () => { addInput('x^2 + y^2 - 25'); updateSelectors(); draw(); };
 window.onresize = draw;
 </script>
