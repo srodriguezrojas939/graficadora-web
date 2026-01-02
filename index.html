@@ -3,284 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graficadora Pro 2D</title>
+    <title>Graficadora Matemática Pro</title>
 
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Solve.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans:wght@400;600;700&family=Roboto+Mono&display=swap');
 
         body { background: #fdfdfd; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Open Sans', sans-serif; color: #333; }
         
-        .calculadora-moderna {
-            max-width: 900px; width: 100%; padding: 40px 30px;
+        .contenedor-principal {
+            max-width: 850px; width: 100%; padding: 40px 30px;
             background: #F2F2F2; border-radius: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.06);
             text-align: center;
         }
 
-        .header-section h1 { font-family: 'Playfair Display', serif; font-size: 34px; margin: 0; }
-        .header-section p { font-family: 'Playfair Display', serif; font-size: 18px; color: #666; margin: 5px 0 25px 0; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 32px; margin: 0; }
+        .header p { font-family: 'Playfair Display', serif; font-size: 18px; color: #666; margin-bottom: 25px; }
 
-        .input-row { display: flex; gap: 12px; align-items: center; background: white; padding: 12px 20px; border-radius: 30px; border: 1px solid #ddd; margin-bottom: 15px; transition: 0.3s; }
-        .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 16px; color: #222; }
-        
-        .btn-delete { background: none; border: none; color: #ff5e5e; font-size: 22px; cursor: pointer; font-weight: bold; }
+        .input-box { display: flex; gap: 12px; align-items: center; background: white; padding: 12px 20px; border-radius: 30px; border: 1px solid #ddd; margin-bottom: 15px; }
+        .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 16px; }
+        .btn-del { background: none; border: none; color: #ff5e5e; font-size: 22px; cursor: pointer; font-weight: bold; }
 
-        /* Píldoras Estilo Imagen */
-        .pills-nav-container {
+        /* PÍLDORAS */
+        .pills-container {
             background: #E0E0E0; padding: 6px; border-radius: 50px;
             display: flex; gap: 5px; margin: 25px 0; border: 1px solid #D1D1D1;
         }
-        .pill-btn {
+        .pill {
             background: transparent; border: none; padding: 12px 20px;
-            border-radius: 40px; font-size: 13px; font-weight: 600; color: #666;
-            cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex: 1;
+            border-radius: 40px; font-size: 13px; font-weight: 700; color: #666;
+            cursor: pointer; transition: 0.3s; flex: 1;
         }
-        .pill-btn.active { background: white; color: black; box-shadow: 0 6px 15px rgba(0,0,0,0.08); font-weight: 700; }
+        .pill.active { background: white; color: black; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-        /* Contenedor Gráfica */
-        #chart-container { background: white; border-radius: 35px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 25px; position: relative; padding: 10px; }
-        
-        .boton-descarga { 
+        #jxgbox { 
+            width: 100%; height: 500px; border-radius: 30px; 
+            background-color: white !important; border: 1px solid #ddd;
+            margin-bottom: 25px; overflow: hidden;
+        }
+
+        .btn-png { 
             background: white; border: 1px solid #ccc; border-radius: 30px; 
             padding: 12px 25px; font-weight: 700; cursor: pointer; 
-            display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; color: #444;
+            display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px;
         }
 
-        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
-        .table-box { background: white; border-radius: 25px; padding: 20px; border: 1px solid #ddd; max-height: 250px; overflow-y: auto; }
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
+        .table-res { background: white; border-radius: 25px; padding: 20px; border: 1px solid #ddd; max-height: 250px; overflow-y: auto; }
         table { width: 100%; font-size: 12px; border-collapse: collapse; }
-        td, th { padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        td { padding: 8px; border-bottom: 1px solid #f0f0f0; }
         
-        .tag { padding: 3px 8px; border-radius: 6px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        
-        select { padding: 10px 15px; border-radius: 20px; border: 1px solid #ccc; background: white; font-weight: 600; margin-bottom: 15px; outline: none; display: none; }
+        .badge { padding: 3px 8px; border-radius: 6px; color: white; font-size: 10px; font-weight: bold; }
+        select { padding: 10px; border-radius: 15px; border: 1px solid #ccc; margin-bottom: 15px; display: none; width: 200px; }
     </style>
 </head>
 <body>
 
-<div class="calculadora-moderna">
-    <div class="header-section">
+<div class="contenedor-principal">
+    <div class="header">
         <h1>Graficadora 2D</h1>
         <p>√(Raiz) Cuadrada²</p>
     </div>
 
     <div id="inputs-list"></div>
-    <button onclick="addInput()" style="background:none; border:2px dashed #aaa; width:100%; padding:12px; border-radius:25px; cursor:pointer; font-weight:bold; color:#777; margin-bottom:15px;">+ Añadir Función</button>
+    <button onclick="addInput()" style="background:none; border:2px dashed #aaa; width:100%; padding:12px; border-radius:25px; cursor:pointer; font-weight:bold; color:#888; margin-bottom:15px;">+ Añadir Función</button>
 
-    <div class="pills-nav-container">
-        <button class="pill-btn active" onclick="setMode('normal', this)">Vista Normal</button>
-        <button class="pill-btn" onclick="setMode('especiales', this)">Puntos especiales</button>
-        <button class="pill-btn" onclick="setMode('area', this)">Área bajo curva</button>
+    <div class="pills-container">
+        <button class="pill active" onclick="setMode('normal', this)">Vista Normal</button>
+        <button class="pill" onclick="setMode('especiales', this)">Puntos especiales</button>
     </div>
 
-    <select id="target-fn" onchange="draw()"></select>
+    <select id="target-fn" onchange="render()"></select>
 
-    <button class="boton-descarga" onclick="exportPNG()">
+    <button class="btn-png" onclick="descargarPNG()">
         <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="16"> Descargar en PNG
     </button>
 
-    <div id="chart-container">
-        <canvas id="myChart"></canvas>
-    </div>
+    <div id="jxgbox" class="jxgbox"></div>
 
-    <div class="bottom-grid">
-        <div class="table-box">
-            <strong id="table-title">Puntos Detectados</strong>
-            <table>
-                <tbody id="table-body"></tbody>
-            </table>
+    <div class="grid-info">
+        <div class="table-res">
+            <strong>Coordenadas Detectadas</strong>
+            <table><tbody id="puntos-body"></tbody></table>
         </div>
-        <div style="font-size: 12px; line-height: 1.6; color: #555; background: white; padding: 20px; border-radius: 25px; border: 1px solid #ddd;">
-            <strong>Referencia de Puntos:</strong><br>
-            <span style="color:#f1c40f">●</span> Cortes X e Y (Amarillo)<br>
-            <span style="color:#3498db">●</span> Máximos Relativos (Azul)<br>
-            <span style="color:#e74c3c">●</span> Mínimos Relativos (Rojo)<br><br>
-            <small>* Usa la rueda del mouse para Zoom y arrastra para moverte.</small>
+        <div style="font-size: 12px; color: #555; background: white; padding: 20px; border-radius: 25px; border: 1px solid #ddd;">
+            <span style="color:#f1c40f">●</span> Cortes Ejes (Amarillo)<br>
+            <span style="color:#3498db">●</span> Máximos (Azul)<br>
+            <span style="color:#e74c3c">●</span> Mínimos (Rojo)<br><br>
+            <em>Haz click en los puntos para ver sus coordenadas exactas en el plano.</em>
         </div>
     </div>
 </div>
 
 <script>
-let mode = 'normal';
-let chartInstance = null;
+let board;
+let modo = 'normal';
+
+function initBoard() {
+    board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-10, 10, 10, -10],
+        axis: true,
+        showCopyright: false,
+        keepaspectratio: false,
+        pan: { enabled: true },
+        zoom: { wheel: true, factor: 1.2 }
+    });
+}
 
 function setMode(m, btn) {
-    mode = m;
-    document.querySelectorAll('.pill-btn').forEach(p => p.classList.remove('active'));
+    modo = m;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('target-fn').style.display = (m !== 'normal') ? 'inline-block' : 'none';
-    draw();
+    document.getElementById('target-fn').style.display = (m === 'especiales') ? 'inline-block' : 'none';
+    render();
 }
 
 function addInput(v = '') {
     const div = document.createElement('div');
-    div.className = 'input-row';
+    div.className = 'input-box';
     div.innerHTML = `
-        <input type="color" value="#333333" onchange="draw()">
-        <input class="fn-input" placeholder="Ej: x^2 - 4" value="${v}" oninput="draw(); updateSelector();">
-        <button class="btn-delete" onclick="this.parentElement.remove(); draw(); updateSelector();">×</button>
+        <input type="color" value="#333333" onchange="render()">
+        <input class="fn-input" placeholder="Ej: x^2 - 4" value="${v}" oninput="render(); updateSel();">
+        <button class="btn-del" onclick="this.parentElement.remove(); render(); updateSel();">×</button>
     `;
     document.getElementById('inputs-list').appendChild(div);
-    updateSelector();
-    draw();
+    updateSel();
+    render();
 }
 
-function updateSelector() {
+function updateSel() {
     const sel = document.getElementById('target-fn');
     sel.innerHTML = "";
     document.querySelectorAll('.fn-input').forEach((input, i) => {
         if(input.value.trim()){
             let opt = document.createElement('option');
-            opt.value = i; opt.text = `Analizar Función f${i+1}`;
+            opt.value = i; opt.text = `Analizar f${i+1}`;
             sel.add(opt);
         }
     });
 }
 
-function draw() {
-    const rows = document.querySelectorAll('.input-row');
-    const datasets = [];
-    const tablePoints = [];
+function render() {
+    if (!board) initBoard();
+    JXG.JSXGraph.freeBoard(board);
+    initBoard();
+
+    const rows = document.querySelectorAll('.input-box');
+    const tableBody = document.getElementById('puntos-body');
+    tableBody.innerHTML = "";
     const targetIdx = document.getElementById('target-fn').value || 0;
 
     rows.forEach((row, i) => {
-        let fnText = row.querySelector('.fn-input').value;
-        let color = row.querySelector('input[type="color"]').value;
-        if (!fnText) return;
+        let rawFn = row.querySelector('.fn-input').value;
+        let col = row.querySelector('input[type="color"]').value;
+        if (!rawFn) return;
 
-        // Generar Curva
-        const points = [];
-        for (let x = -10; x <= 10; x += 0.1) {
-            try {
-                let y = parseFloat(nerdamer(fnText).evaluate({x: x}).toString());
-                if(!isNaN(y) && isFinite(y)) points.push({x: x, y: y});
-            } catch(e){}
-        }
+        try {
+            // Dibujar Función
+            let f = board.create('functiongraph', [x => {
+                try { return parseFloat(nerdamer(rawFn).evaluate({x: x}).toString()); } catch(e) { return NaN; }
+            }], { strokeColor: col, strokeWidth: 3 });
 
-        let mainDataset = {
-            label: `f${i+1}`,
-            data: points,
-            borderColor: color,
-            borderWidth: 3,
-            pointRadius: 0,
-            fill: (mode === 'area' && i == targetIdx),
-            backgroundColor: color + '33',
-            tension: 0.3,
-            showLine: true
-        };
-        datasets.push(mainDataset);
-
-        // --- LÓGICA DE PUNTOS ESPECIALES ---
-        if (mode === 'especiales' && i == targetIdx) {
-            try {
-                // 1. Cortes X
-                let roots = nerdamer.solve(fnText, 'x').symbol.elements;
-                const rData = [];
-                roots.map(r => parseFloat(nerdamer(r).evaluate())).filter(v => !isNaN(v)).sort((a,b)=>Math.abs(a)-Math.abs(b)).slice(0,6).forEach(rx => {
-                    rData.push({x: rx, y: 0});
-                    tablePoints.push({t: 'Raíz', v: `(${rx.toFixed(2)}, 0)`, c: '#f1c40f'});
+            // Puntos Especiales
+            if (modo === 'especiales' && i == targetIdx) {
+                // 1. Cortes con X (Raíces)
+                let roots = nerdamer.solve(rawFn, 'x').symbol.elements;
+                roots.map(r => parseFloat(nerdamer(r).evaluate())).filter(v => !isNaN(v)).slice(0, 6).forEach(rx => {
+                    crearPunto(rx, 0, '#f1c40f', 'Corte X', tableBody);
                 });
-                datasets.push({ label: 'Raíces', data: rData, backgroundColor: '#f1c40f', pointRadius: 8, pointHoverRadius: 10, showLine: false });
 
-                // 2. Corte Y
-                let y0 = parseFloat(nerdamer(fnText).evaluate({x: 0}));
-                if(!isNaN(y0)) {
-                    datasets.push({ label: 'Corte Y', data: [{x: 0, y: y0}], backgroundColor: '#f1c40f', pointRadius: 8, showLine: false });
-                    tablePoints.push({t: 'Corte Y', v: `(0, ${y0.toFixed(2)})`, c: '#f1c40f'});
-                }
+                // 2. Corte con Y
+                let y0 = parseFloat(nerdamer(rawFn).evaluate({x: 0}));
+                if(!isNaN(y0)) crearPunto(0, y0, '#f1c40f', 'Corte Y', tableBody);
 
-                // 3. Extremos (Máx/Mín)
-                let d1 = nerdamer.diff(fnText, 'x').toString();
+                // 3. Máximos y Mínimos
+                let d1 = nerdamer.diff(rawFn, 'x').toString();
                 let d2 = nerdamer.diff(d1, 'x').toString();
                 let crits = nerdamer.solve(d1, 'x').symbol.elements;
-                
-                const maxData = [], minData = [];
-                crits.map(p => parseFloat(nerdamer(p).evaluate())).filter(v => !isNaN(v)).sort((a,b)=>Math.abs(a)-Math.abs(b)).slice(0,6).forEach(cx => {
-                    let cy = parseFloat(nerdamer(fnText).evaluate({x: cx}));
+
+                crits.map(c => parseFloat(nerdamer(c).evaluate())).filter(v => !isNaN(v)).slice(0, 6).forEach(cx => {
+                    let cy = parseFloat(nerdamer(rawFn).evaluate({x: cx}));
                     let curv = parseFloat(nerdamer(d2).evaluate({x: cx}));
-                    if(curv < 0) {
-                        maxData.push({x: cx, y: cy});
-                        tablePoints.push({t: 'Máximo', v: `(${cx.toFixed(2)}, ${cy.toFixed(2)})`, c: '#3498db'});
-                    } else {
-                        minData.push({x: cx, y: cy});
-                        tablePoints.push({t: 'Mínimo', v: `(${cx.toFixed(2)}, ${cy.toFixed(2)})`, c: '#e74c3c'});
-                    }
+                    if (curv < 0) crearPunto(cx, cy, '#3498db', 'Máximo', tableBody);
+                    else if (curv > 0) crearPunto(cx, cy, '#e74c3c', 'Mínimo', tableBody);
                 });
-                datasets.push({ label: 'Max', data: maxData, backgroundColor: '#3498db', pointRadius: 9, showLine: false });
-                datasets.push({ label: 'Min', data: minData, backgroundColor: '#e74c3c', pointRadius: 9, showLine: false });
-
-            } catch(e){}
-        }
-    });
-
-    renderChart(datasets);
-    updateTable(tablePoints);
-}
-
-function renderChart(datasets) {
-    const ctx = document.getElementById('myChart').getContext('2d');
-    if (chartInstance) chartInstance.destroy();
-
-    chartInstance = new Chart(ctx, {
-        type: 'scatter',
-        data: { datasets: datasets },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: false,
-            scales: {
-                x: {
-                    type: 'linear',
-                    position: 'center', // EJE EN EL CENTRO
-                    grid: { color: '#e0e0e0' },
-                    ticks: { color: '#888', font: { weight: 'bold' } }
-                },
-                y: {
-                    type: 'linear',
-                    position: 'center', // EJE EN EL CENTRO
-                    grid: { color: '#e0e0e0' },
-                    ticks: { color: '#888', font: { weight: 'bold' } }
-                }
-            },
-            plugins: {
-                legend: { display: false },
-                zoom: {
-                    pan: { enabled: true, mode: 'xy' },
-                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `(${ctx.raw.x.toFixed(2)}, ${ctx.raw.y.toFixed(2)})`
-                    }
-                }
             }
-        }
+        } catch(e) {}
     });
 }
 
-function updateTable(pts) {
-    const body = document.getElementById('table-body');
-    body.innerHTML = "";
-    pts.forEach(p => {
-        body.innerHTML += `<tr><td><span class="tag" style="background:${p.c}">${p.t}</span></td><td style="font-family:'Roboto Mono'">${p.v}</td></tr>`;
+function crearPunto(x, y, color, tipo, table) {
+    let p = board.create('point', [x, y], {
+        name: tipo.charAt(0),
+        strokeColor: color,
+        fillColor: color,
+        size: 5,
+        label: { visible: false } // Se muestra al hacer click
     });
+
+    // Al hacer click, muestra la coordenada encima
+    p.on('down', function() {
+        p.setAttribute({ label: { visible: true, offset: [0, 15] } });
+        p.label.setText(`(${x.toFixed(2)}, ${y.toFixed(2)})`);
+    });
+
+    table.innerHTML += `<tr><td><span class="badge" style="background:${color}">${tipo}</span></td><td>(${x.toFixed(2)}, ${y.toFixed(2)})</td></tr>`;
 }
 
-function exportPNG() {
-    const link = document.createElement('a');
-    link.download = 'grafica.png';
-    link.href = document.getElementById('myChart').toDataURL('image/png');
-    link.click();
+function descargarPNG() {
+    // JSXGraph no exporta a PNG directo fácilmente, usamos un truco de captura
+    const svg = document.querySelector('#jxgbox svg');
+    const xml = new XMLSerializer().serializeToString(svg);
+    const svg64 = btoa(unescape(encodeURIComponent(xml)));
+    const img = new Image();
+    img.src = 'data:image/svg+xml;base64,' + svg64;
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1000; canvas.height = 800;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, 1000, 800);
+        const link = document.createElement('a');
+        link.download = 'grafica_matematica.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    };
 }
 
-window.onload = () => { addInput('x^2 - 4'); draw(); };
+window.onload = () => { addInput('x^2 - 4'); };
 </script>
 </body>
 </html>
