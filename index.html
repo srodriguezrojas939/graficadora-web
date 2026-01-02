@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graficadora Pro - Plotly Engine</title>
+    <title>Graficadora Pro 2D</title>
 
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Solve.js"></script>
-    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans:wght@400;600;700&family=Roboto+Mono&display=swap');
 
-        body { background: #fdfdfd; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Open Sans', sans-serif; }
+        body { background: #fdfdfd; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Open Sans', sans-serif; color: #333; }
         
         .calculadora-moderna {
-            max-width: 850px; width: 100%; padding: 40px 30px;
-            background: #F2F2F2; border-radius: 35px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.05);
+            max-width: 900px; width: 100%; padding: 40px 30px;
+            background: #F2F2F2; border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
             text-align: center;
         }
 
-        .header-section h1 { font-family: 'Playfair Display', serif; font-size: 32px; margin: 0; }
-        .header-section p { font-family: 'Playfair Display', serif; font-size: 18px; color: #444; margin: 5px 0 25px 0; }
+        .header-section h1 { font-family: 'Playfair Display', serif; font-size: 34px; margin: 0; }
+        .header-section p { font-family: 'Playfair Display', serif; font-size: 18px; color: #666; margin: 5px 0 25px 0; }
 
-        .input-row { display: flex; gap: 10px; align-items: center; background: white; padding: 10px 18px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 12px; }
-        .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 15px; }
+        .input-row { display: flex; gap: 12px; align-items: center; background: white; padding: 12px 20px; border-radius: 30px; border: 1px solid #ddd; margin-bottom: 15px; transition: 0.3s; }
+        .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 16px; color: #222; }
         
-        .btn-delete { background: none; border: none; color: #ff4d4d; font-size: 20px; cursor: pointer; font-weight: bold; padding: 0 5px; }
+        .btn-delete { background: none; border: none; color: #ff5e5e; font-size: 22px; cursor: pointer; font-weight: bold; }
 
         /* Píldoras Estilo Imagen */
         .pills-nav-container {
@@ -38,26 +39,28 @@
         }
         .pill-btn {
             background: transparent; border: none; padding: 12px 20px;
-            border-radius: 40px; font-size: 13px; font-weight: 600; color: #555;
-            cursor: pointer; transition: 0.3s; flex: 1;
+            border-radius: 40px; font-size: 13px; font-weight: 600; color: #666;
+            cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex: 1;
         }
-        .pill-btn.active { background: white; color: black; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 700; }
+        .pill-btn.active { background: white; color: black; box-shadow: 0 6px 15px rgba(0,0,0,0.08); font-weight: 700; }
 
-        #grafica-div { background: white; border-radius: 30px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 20px; }
+        /* Contenedor Gráfica */
+        #chart-container { background: white; border-radius: 35px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 25px; position: relative; padding: 10px; }
         
         .boton-descarga { 
             background: white; border: 1px solid #ccc; border-radius: 30px; 
             padding: 12px 25px; font-weight: 700; cursor: pointer; 
-            display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px;
+            display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; color: #444;
         }
 
         .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
-        .table-box { background: white; border-radius: 20px; padding: 15px; border: 1px solid #ccc; max-height: 250px; overflow-y: auto; }
-        table { width: 100%; font-size: 11px; border-collapse: collapse; }
-        td, th { padding: 8px; border-bottom: 1px solid #eee; }
+        .table-box { background: white; border-radius: 25px; padding: 20px; border: 1px solid #ddd; max-height: 250px; overflow-y: auto; }
+        table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        td, th { padding: 10px; border-bottom: 1px solid #f0f0f0; }
         
-        .tag { padding: 2px 6px; border-radius: 5px; color: white; font-size: 9px; font-weight: bold; }
-        .select-fn { padding: 10px; border-radius: 15px; border: 1px solid #ccc; margin-bottom: 15px; background: white; font-weight: bold; display: none; }
+        .tag { padding: 3px 8px; border-radius: 6px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        
+        select { padding: 10px 15px; border-radius: 20px; border: 1px solid #ccc; background: white; font-weight: 600; margin-bottom: 15px; outline: none; display: none; }
     </style>
 </head>
 <body>
@@ -69,7 +72,7 @@
     </div>
 
     <div id="inputs-list"></div>
-    <button onclick="addInput()" style="background:none; border:2px dashed #bbb; width:100%; padding:10px; border-radius:20px; cursor:pointer; font-weight:bold; color:#666; margin-bottom:15px;">+ Añadir Función</button>
+    <button onclick="addInput()" style="background:none; border:2px dashed #aaa; width:100%; padding:12px; border-radius:25px; cursor:pointer; font-weight:bold; color:#777; margin-bottom:15px;">+ Añadir Función</button>
 
     <div class="pills-nav-container">
         <button class="pill-btn active" onclick="setMode('normal', this)">Vista Normal</button>
@@ -77,33 +80,36 @@
         <button class="pill-btn" onclick="setMode('area', this)">Área bajo curva</button>
     </div>
 
-    <select id="target-fn" class="select-fn" onchange="draw()"></select>
+    <select id="target-fn" onchange="draw()"></select>
 
     <button class="boton-descarga" onclick="exportPNG()">
         <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="16"> Descargar en PNG
     </button>
 
-    <div id="grafica-div"></div>
+    <div id="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
 
     <div class="bottom-grid">
         <div class="table-box">
-            <strong id="table-title">Datos</strong>
+            <strong id="table-title">Puntos Detectados</strong>
             <table>
-                <thead><tr><th>Punto</th><th>Coordenada</th></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
-        <div style="font-size: 12px; color: #666; background: white; padding: 15px; border-radius: 20px; border: 1px solid #ccc;">
-            <strong>Leyenda:</strong><br><br>
-            <span style="color:#f1c40f">●</span> Cortes Eje X/Y (Amarillo)<br>
-            <span style="color:#3498db">●</span> Máximos (Azul)<br>
-            <span style="color:#e74c3c">●</span> Mínimos (Rojo)
+        <div style="font-size: 12px; line-height: 1.6; color: #555; background: white; padding: 20px; border-radius: 25px; border: 1px solid #ddd;">
+            <strong>Referencia de Puntos:</strong><br>
+            <span style="color:#f1c40f">●</span> Cortes X e Y (Amarillo)<br>
+            <span style="color:#3498db">●</span> Máximos Relativos (Azul)<br>
+            <span style="color:#e74c3c">●</span> Mínimos Relativos (Rojo)<br><br>
+            <small>* Usa la rueda del mouse para Zoom y arrastra para moverte.</small>
         </div>
     </div>
 </div>
 
 <script>
 let mode = 'normal';
+let chartInstance = null;
 
 function setMode(m, btn) {
     mode = m;
@@ -132,32 +138,16 @@ function updateSelector() {
     document.querySelectorAll('.fn-input').forEach((input, i) => {
         if(input.value.trim()){
             let opt = document.createElement('option');
-            opt.value = i; opt.text = `Función f${i+1}`;
+            opt.value = i; opt.text = `Analizar Función f${i+1}`;
             sel.add(opt);
         }
     });
 }
 
-function generateData(fnText) {
-    const xValues = [];
-    const yValues = [];
-    for (let x = -10; x <= 10; x += 0.05) {
-        try {
-            let res = nerdamer(fnText).evaluate({x: x});
-            let y = parseFloat(res.toString());
-            if (!isNaN(y) && isFinite(y)) {
-                xValues.push(x);
-                yValues.push(y);
-            }
-        } catch(e) {}
-    }
-    return { x: xValues, y: yValues };
-}
-
 function draw() {
     const rows = document.querySelectorAll('.input-row');
-    const plotData = [];
-    const pointsList = [];
+    const datasets = [];
+    const tablePoints = [];
     const targetIdx = document.getElementById('target-fn').value || 0;
 
     rows.forEach((row, i) => {
@@ -165,84 +155,132 @@ function draw() {
         let color = row.querySelector('input[type="color"]').value;
         if (!fnText) return;
 
-        let curve = generateData(fnText);
-        let trace = {
-            x: curve.x, y: curve.y,
-            type: 'scatter', mode: 'lines',
-            name: `f${i+1}`, line: { color: color, width: 3 }
-        };
+        // Generar Curva
+        const points = [];
+        for (let x = -10; x <= 10; x += 0.1) {
+            try {
+                let y = parseFloat(nerdamer(fnText).evaluate({x: x}).toString());
+                if(!isNaN(y) && isFinite(y)) points.push({x: x, y: y});
+            } catch(e){}
+        }
 
-        if (mode === 'area' && i == targetIdx) trace.fill = 'tozeroy';
-        plotData.push(trace);
+        let mainDataset = {
+            label: `f${i+1}`,
+            data: points,
+            borderColor: color,
+            borderWidth: 3,
+            pointRadius: 0,
+            fill: (mode === 'area' && i == targetIdx),
+            backgroundColor: color + '33',
+            tension: 0.3,
+            showLine: true
+        };
+        datasets.push(mainDataset);
 
         // --- LÓGICA DE PUNTOS ESPECIALES ---
         if (mode === 'especiales' && i == targetIdx) {
             try {
-                // 1. CORTES EJE X (AMARILLO)
+                // 1. Cortes X
                 let roots = nerdamer.solve(fnText, 'x').symbol.elements;
-                let rX = [], rY = [];
-                roots.map(r => parseFloat(nerdamer(r).evaluate())).filter(v => !isNaN(v)).sort((a,b)=>Math.abs(a)-Math.abs(b)).slice(0,6).forEach(x => {
-                    rX.push(x); rY.push(0);
-                    pointsList.push({t: 'Raíz', v: `(${x.toFixed(2)}, 0)`, c: '#f1c40f'});
+                const rData = [];
+                roots.map(r => parseFloat(nerdamer(r).evaluate())).filter(v => !isNaN(v)).sort((a,b)=>Math.abs(a)-Math.abs(b)).slice(0,6).forEach(rx => {
+                    rData.push({x: rx, y: 0});
+                    tablePoints.push({t: 'Raíz', v: `(${rx.toFixed(2)}, 0)`, c: '#f1c40f'});
                 });
-                plotData.push({ x: rX, y: rY, mode: 'markers', marker: { color: '#f1c40f', size: 12, line: {width: 2, color: 'white'} }, name: 'Corte X' });
+                datasets.push({ label: 'Raíces', data: rData, backgroundColor: '#f1c40f', pointRadius: 8, pointHoverRadius: 10, showLine: false });
 
-                // 2. CORTE EJE Y
+                // 2. Corte Y
                 let y0 = parseFloat(nerdamer(fnText).evaluate({x: 0}));
                 if(!isNaN(y0)) {
-                    plotData.push({ x: [0], y: [y0], mode: 'markers', marker: { color: '#f1c40f', size: 12, border: 'white' }, name: 'Corte Y' });
-                    pointsList.push({t: 'Corte Y', v: `(0, ${y0.toFixed(2)})`, c: '#f1c40f'});
+                    datasets.push({ label: 'Corte Y', data: [{x: 0, y: y0}], backgroundColor: '#f1c40f', pointRadius: 8, showLine: false });
+                    tablePoints.push({t: 'Corte Y', v: `(0, ${y0.toFixed(2)})`, c: '#f1c40f'});
                 }
 
-                // 3. MAX/MIN (DERIVADAS)
+                // 3. Extremos (Máx/Mín)
                 let d1 = nerdamer.diff(fnText, 'x').toString();
                 let d2 = nerdamer.diff(d1, 'x').toString();
                 let crits = nerdamer.solve(d1, 'x').symbol.elements;
                 
-                let mxX = [], mxY = [], mnX = [], mnY = [];
-                crits.map(p => parseFloat(nerdamer(p).evaluate())).filter(v => !isNaN(v)).forEach(x => {
-                    let y = parseFloat(nerdamer(fnText).evaluate({x: x}));
-                    let curv = parseFloat(nerdamer(d2).evaluate({x: x}));
-                    if(curv < 0) { mxX.push(x); mxY.push(y); pointsList.push({t:'Máximo', v:`(${x.toFixed(2)}, ${y.toFixed(2)})`, c:'#3498db'}); }
-                    else { mnX.push(x); mnY.push(y); pointsList.push({t:'Mínimo', v:`(${x.toFixed(2)}, ${y.toFixed(2)})`, c:'#e74c3c'}); }
+                const maxData = [], minData = [];
+                crits.map(p => parseFloat(nerdamer(p).evaluate())).filter(v => !isNaN(v)).sort((a,b)=>Math.abs(a)-Math.abs(b)).slice(0,6).forEach(cx => {
+                    let cy = parseFloat(nerdamer(fnText).evaluate({x: cx}));
+                    let curv = parseFloat(nerdamer(d2).evaluate({x: cx}));
+                    if(curv < 0) {
+                        maxData.push({x: cx, y: cy});
+                        tablePoints.push({t: 'Máximo', v: `(${cx.toFixed(2)}, ${cy.toFixed(2)})`, c: '#3498db'});
+                    } else {
+                        minData.push({x: cx, y: cy});
+                        tablePoints.push({t: 'Mínimo', v: `(${cx.toFixed(2)}, ${cy.toFixed(2)})`, c: '#e74c3c'});
+                    }
                 });
-                plotData.push({ x: mxX, y: mxY, mode: 'markers', marker: { color: '#3498db', size: 14 }, name: 'Máximo' });
-                plotData.push({ x: mnX, y: mnY, mode: 'markers', marker: { color: '#e74c3c', size: 14 }, name: 'Mínimo' });
+                datasets.push({ label: 'Max', data: maxData, backgroundColor: '#3498db', pointRadius: 9, showLine: false });
+                datasets.push({ label: 'Min', data: minData, backgroundColor: '#e74c3c', pointRadius: 9, showLine: false });
 
-            } catch(e) {}
+            } catch(e){}
         }
     });
 
-    const layout = {
-        showlegend: false,
-        margin: { t: 20, b: 20, l: 20, r: 20 },
-        hovermode: 'closest',
-        xaxis: {
-            zeroline: true, zerolinewidth: 2, zerolinecolor: '#000',
-            gridcolor: '#eee', range: [-10, 10], fixedrange: false
-        },
-        yaxis: {
-            zeroline: true, zerolinewidth: 2, zerolinecolor: '#000',
-            gridcolor: '#eee', range: [-10, 10], fixedrange: false
-        },
-        plot_bgcolor: 'white'
-    };
+    renderChart(datasets);
+    updateTable(tablePoints);
+}
 
-    Plotly.newPlot('grafica-div', plotData, layout, {responsive: true, displayModeBar: false});
+function renderChart(datasets) {
+    const ctx = document.getElementById('myChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
 
-    // Actualizar Tabla
-    const tbody = document.getElementById('table-body');
-    tbody.innerHTML = "";
-    pointsList.slice(0,18).forEach(p => {
-        tbody.innerHTML += `<tr><td><span class="tag" style="background:${p.c}">${p.t}</span></td><td>${p.v}</td></tr>`;
+    chartInstance = new Chart(ctx, {
+        type: 'scatter',
+        data: { datasets: datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'center', // EJE EN EL CENTRO
+                    grid: { color: '#e0e0e0' },
+                    ticks: { color: '#888', font: { weight: 'bold' } }
+                },
+                y: {
+                    type: 'linear',
+                    position: 'center', // EJE EN EL CENTRO
+                    grid: { color: '#e0e0e0' },
+                    ticks: { color: '#888', font: { weight: 'bold' } }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                zoom: {
+                    pan: { enabled: true, mode: 'xy' },
+                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `(${ctx.raw.x.toFixed(2)}, ${ctx.raw.y.toFixed(2)})`
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateTable(pts) {
+    const body = document.getElementById('table-body');
+    body.innerHTML = "";
+    pts.forEach(p => {
+        body.innerHTML += `<tr><td><span class="tag" style="background:${p.c}">${p.t}</span></td><td style="font-family:'Roboto Mono'">${p.v}</td></tr>`;
     });
 }
 
 function exportPNG() {
-    Plotly.downloadImage('grafica-div', {format: 'png', width: 1000, height: 800, filename: 'grafica_pro'});
+    const link = document.createElement('a');
+    link.download = 'grafica.png';
+    link.href = document.getElementById('myChart').toDataURL('image/png');
+    link.click();
 }
 
-window.onload = () => { addInput('x^2 - 4'); addInput('sin(x)'); draw(); };
+window.onload = () => { addInput('x^2 - 4'); draw(); };
 </script>
 </body>
 </html>
