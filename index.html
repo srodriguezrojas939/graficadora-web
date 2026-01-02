@@ -48,8 +48,8 @@
 
         #grafica-wrapper { background: white; border-radius: 35px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 25px; }
         
-        /* Grid inferior: Tabla y Panel */
-        .bottom-grid { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 25px; }
+        /* Grid inferior: Tabla y Panel (MODIFICADO: Ahora en columna) */
+        .bottom-grid { display: flex; flex-direction: column; gap: 25px; }
 
         /* Estética de la Tabla con Selector */
         .table-box { background: white; border-radius: 25px; padding: 20px; border: 1px solid #ccc; max-height: 350px; display: flex; flex-direction: column; }
@@ -62,7 +62,7 @@
         td, th { padding: 10px 8px; border-bottom: 1px solid #f9f9f9; text-align: left; }
         th { color: #999; font-weight: 600; font-size: 10px; text-transform: uppercase; }
 
-        /* Panel de Símbolos Estilo Imagen 1 */
+        /* Panel de Símbolos */
         .symbol-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .sym-btn { 
             background: white; border: none; border-radius: 18px; padding: 12px 5px;
@@ -74,18 +74,17 @@
         .sym-btn .main-sym { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 16px; color: #333; }
         .sym-btn .sub-label { font-size: 8px; font-weight: 700; color: #bbb; margin-top: 4px; text-transform: uppercase; }
 
-        /* Botón PNG Estilo Imagen 2 (MODIFICADO: Más delgado) */
+        /* Botón PNG (MODIFICADO: Más delgado) */
         .btn-png-container { grid-column: span 4; display: flex; justify-content: center; margin-top: 5px; }
         .btn-png {
             background: white; border: 1px solid #e0e0e0; border-radius: 50px;
-            padding: 4px 25px; /* Se redujo el padding vertical de 12px a 8px */
-            cursor: pointer; display: flex; align-items: center; gap: 12px;
+            padding: 2px 20px; /* Reducido para ser más delgado */
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
             transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .btn-png:hover { background: #fdfdfd; border-color: #ccc; }
-        .btn-png span { font-weight: 700; font-size: 15px; color: #000; }
-        /* SVG actualizado al nuevo icono */
-        .btn-png svg { width: 20px; height: 20px; stroke: #000; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .btn-png span { font-weight: 700; font-size: 13px; color: #000; } /* Fuente ligeramente más pequeña */
+        .btn-png svg { width: 18px; height: 18px; stroke: #000; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         .tag { padding: 4px 8px; border-radius: 6px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .select-fn-box { margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 10px; }
@@ -158,12 +157,12 @@
                 <span class="main-sym">|x|</span><span class="sub-label">Absoluto</span>
             </button>
 
-      <div class="btn-png-container">
-    <button class="btn-png" onclick="exportPNG()">
-        <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" alt="download" style="width: 20px; height: 20px;">
-        <span>Descargar en PNG</span>
-    </button>
-</div>
+            <div class="btn-png-container">
+                <button class="btn-png" onclick="exportPNG()">
+                    <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" alt="download" style="width: 18px; height: 18px;">
+                    <span>Descargar en PNG</span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -178,20 +177,24 @@ function setMode(m, btn) {
     mode = m;
     document.querySelectorAll('.pill-btn').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    // Mostrar selector para 'especiales' O 'area'
     document.getElementById('select-fn-container').style.display = (m === 'especiales' || m === 'area') ? 'flex' : 'none';
     draw();
 }
 
 function addInput(v = '') {
+    const inputsList = document.getElementById('inputs-list');
+    // MODIFICADO: Primera función siempre púrpura, luego al azar
+    const isFirst = inputsList.children.length === 0;
+    const defaultColor = isFirst ? '#8e44ad' : `#${Math.floor(Math.random()*16777215).toString(16)}`;
+    
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="color" value="#${Math.floor(Math.random()*16777215).toString(16)}" onchange="draw()">
+        <input type="color" value="${defaultColor}" onchange="draw()">
         <input class="fn-input" placeholder="f(x) = ..." value="${v}" oninput="draw(); updateSelectors();" onfocus="lastInput=this">
         <button class="btn-delete" onclick="this.parentElement.remove(); draw(); updateSelectors();">×</button>
     `;
-    document.getElementById('inputs-list').appendChild(div);
+    inputsList.appendChild(div);
     if(!lastInput) lastInput = div.querySelector('.fn-input');
     updateSelectors();
     draw();
@@ -244,19 +247,16 @@ function draw() {
     functions.forEach((f, i) => {
         data.push({
             fn: f.fn, color: f.color,
-            // Lógica para sombrear el área si el modo es 'area' y es la función seleccionada
             closed: mode === 'area' && i == document.getElementById('target-fn').value,
             graphType: 'polyline'
         });
     });
 
-    // Puntos Especiales (Análisis)
     if(mode === 'especiales' && functions.length > 0) {
         const targetIdx = document.getElementById('target-fn').value || 0;
         const main = functions[targetIdx];
         if(main) {
             try {
-                // Raíces
                 let roots = nerdamer.solve(main.fn, 'x').symbol.elements;
                 roots.forEach(r => {
                     let x = parseFloat(nerdamer(r).evaluate().text());
@@ -266,13 +266,11 @@ function draw() {
                         pointsForTable.push({type: 'Corte X', x: x.toFixed(2), y: '0.00', col: '#f1c40f'});
                     }
                 });
-                // Corte Y
                 let y0 = parseFloat(nerdamer(main.fn).evaluate({x: 0}).text());
                 if(!isNaN(y0)) {
                     data.push({ points: [[0, y0]], fnType: 'points', graphType: 'scatter', color: '#e67e22', attr: {r: 5} });
                     pointsForTable.push({type: 'Corte Y', x: '0.00', y: y0.toFixed(2), col: '#e67e22'});
                 }
-                // Extremos
                 let d1 = nerdamer.diff(main.fn, 'x').toString();
                 let criticos = nerdamer.solve(d1, 'x').symbol.elements;
                 criticos.forEach(p => {
@@ -340,7 +338,6 @@ function exportPNG() {
     const xml = new XMLSerializer().serializeToString(svg);
     const img = new Image();
 
-    // Aumentamos la resolución para que se vea nítido
     canvas.width = svg.clientWidth * 2;
     canvas.height = svg.clientHeight * 2;
 
@@ -348,40 +345,20 @@ function exportPNG() {
     const url = URL.createObjectURL(blob);
 
     img.onload = () => {
-        // 1. Rellenar fondo blanco (si no, sería transparente)
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // 2. Dibujar la gráfica SVG sobre el canvas
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // --- INICIO MARCA DE AGUA ---
-
-        // Configurar la fuente: Negrita, tamaño relativo (pequeño), Playfair Display
-        // Usamos 24px que se verá pequeño en una imagen de alta resolución.
         ctx.font = "bold 24px 'Playfair Display', serif";
-
-        // Configurar el color: Usamos gris con transparencia (rgba) para efecto sutil
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-
-        // Configurar alineación: Alineamos a la derecha y abajo para posicionar fácil en la esquina
         ctx.textAlign = "right";
         ctx.textBaseline = "bottom";
-
-        // Dibujar el texto:
-        // x = ancho total menos un margen de 40px
-        // y = alto total menos un margen de 40px
         ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
 
-        // --- FIN MARCA DE AGUA ---
-
-        // 3. Iniciar descarga
         const a = document.createElement('a');
         a.download = 'mi_grafica_con_marca.png';
         a.href = canvas.toDataURL();
         a.click();
-        
-        // Limpiar memoria
         URL.revokeObjectURL(url);
     };
     img.src = url;
