@@ -74,16 +74,18 @@
         .sym-btn .main-sym { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 16px; color: #333; }
         .sym-btn .sub-label { font-size: 8px; font-weight: 700; color: #bbb; margin-top: 4px; text-transform: uppercase; }
 
-        /* Botón PNG Estilo Imagen 2 */
+        /* Botón PNG Estilo Imagen 2 (MODIFICADO: Más delgado) */
         .btn-png-container { grid-column: span 4; display: flex; justify-content: center; margin-top: 5px; }
         .btn-png {
             background: white; border: 1px solid #e0e0e0; border-radius: 50px;
-            padding: 12px 30px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+            padding: 8px 30px; /* Se redujo el padding vertical de 12px a 8px */
+            cursor: pointer; display: flex; align-items: center; gap: 12px;
             transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .btn-png:hover { background: #fdfdfd; border-color: #ccc; }
         .btn-png span { font-weight: 700; font-size: 15px; color: #000; }
-        .btn-png svg { width: 18px; height: 18px; fill: #000; }
+        /* SVG actualizado al nuevo icono */
+        .btn-png svg { width: 20px; height: 20px; stroke: #000; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         .tag { padding: 4px 8px; border-radius: 6px; color: white; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .select-fn-box { margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 10px; }
@@ -103,10 +105,11 @@
     <div class="pills-nav-container">
         <button class="pill-btn active" onclick="setMode('normal', this)">Vista Normal</button>
         <button class="pill-btn" onclick="setMode('especiales', this)">Puntos especiales</button>
+        <button class="pill-btn" onclick="setMode('area', this)">Área bajo curva</button>
     </div>
 
     <div id="select-fn-container" class="select-fn-box">
-        <label style="font-size: 12px; font-weight: bold; color: #666;">Analizar puntos especiales de:</label>
+        <label style="font-size: 12px; font-weight: bold; color: #666;">Analizar / Sombrear:</label>
         <select id="target-fn" onchange="draw()" style="padding: 5px 15px; border-radius: 10px; border: 1px solid #ccc;"></select>
     </div>
 
@@ -157,7 +160,11 @@
 
             <div class="btn-png-container">
                 <button class="btn-png" onclick="exportPNG()">
-                    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
                     <span>Descargar en PNG</span>
                 </button>
             </div>
@@ -175,7 +182,8 @@ function setMode(m, btn) {
     mode = m;
     document.querySelectorAll('.pill-btn').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('select-fn-container').style.display = (m === 'especiales') ? 'flex' : 'none';
+    // Mostrar selector para 'especiales' O 'area'
+    document.getElementById('select-fn-container').style.display = (m === 'especiales' || m === 'area') ? 'flex' : 'none';
     draw();
 }
 
@@ -238,7 +246,12 @@ function draw() {
     });
 
     functions.forEach((f, i) => {
-        data.push({ fn: f.fn, color: f.color, graphType: 'polyline' });
+        data.push({
+            fn: f.fn, color: f.color,
+            // Lógica para sombrear el área si el modo es 'area' y es la función seleccionada
+            closed: mode === 'area' && i == document.getElementById('target-fn').value,
+            graphType: 'polyline'
+        });
     });
 
     // Puntos Especiales (Análisis)
