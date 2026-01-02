@@ -2,328 +2,199 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graficadora 2D Pro - Puntos Especiales</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora y Graficadora Pro</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Solve.js"></script>
-    <script src="https://unpkg.com/d3@3/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.min.js"></script>
     <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans:wght@400;600;700&family=Roboto+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Open+Sans:wght@400;600;700&display=swap');
 
-        body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Open Sans', sans-serif; }
+        body { background: white; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; font-family: 'Open Sans', sans-serif; }
+        .container { width: 100%; max-width: 600px; background: #F2F2F2; padding: 30px 20px; border-radius: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         
-        .calculadora-moderna {
-            max-width: 850px; width: 100%; padding: 40px 30px;
-            background: #F2F2F2; border-radius: 35px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.05);
-            text-align: center;
-        }
+        .header-section { text-align: center; margin-bottom: 20px; }
+        .header-section h1 { font-family: 'Playfair Display', serif; font-size: 32px; margin: 0; font-weight: 600; text-transform: lowercase; }
 
-        .header-section h1 { font-family: 'Playfair Display', serif; font-size: 32px; margin: 0; }
-        .header-section p { font-family: 'Playfair Display', serif; font-size: 18px; color: #444; margin: 5px 0 25px 0; }
+        #preview-container { background: white; margin-bottom: 20px; padding: 20px; border-radius: 20px; min-height: 70px; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; overflow-x: auto; }
 
-        .input-row { display: flex; gap: 10px; align-items: center; background: white; padding: 12px 18px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 12px; }
-        .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 15px; }
-        input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
+        /* DISTANCIA EXACTA DE 34PX */
+        #graph-section { margin-top: 34px; background: white; border-radius: 20px; padding: 15px; border: 1px solid #eee; position: relative; }
+        #root { width: 100%; height: 350px; }
 
-        /* Píldoras Estilo Imagen */
-        .pills-nav-container {
-            background: #E0E0E0; padding: 6px; border-radius: 50px;
-            display: flex; gap: 5px; margin: 25px 0; border: 1px solid #D1D1D1;
-        }
-        .pill-btn {
-            background: transparent; border: none; padding: 12px 20px;
-            border-radius: 40px; font-size: 13px; font-weight: 600; color: #555;
-            cursor: pointer; transition: 0.3s; flex: 1;
-        }
-        .pill-btn.active { background: white; color: black; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 700; }
+        label { display: block; font-size: 14px; color: #444; margin: 0 0 6px 12px; font-weight: 600; }
+        input { width: 100%; padding: 14px 18px; margin-bottom: 15px; border-radius: 25px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; outline: none; background: white; }
 
-        /* Selector de Función para Análisis */
-        .select-fn-box { margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 10px; }
-        select { padding: 8px 15px; border-radius: 15px; border: 1px solid #ccc; font-weight: bold; }
-
-        #grafica-wrapper { background: white; border-radius: 30px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 20px; }
+        .btn-principal { width: 100%; background: black; color: white; border: none; padding: 18px; border-radius: 30px; font-size: 16px; cursor: pointer; font-weight: 700; margin-bottom: 12px; }
         
-        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
-        .symbol-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .sym-btn { background: white; border: 1px solid #ccc; padding: 10px; border-radius: 12px; cursor: pointer; font-family: 'Roboto Mono', monospace; font-weight: bold; font-size: 12px; }
-        .table-box { background: white; border-radius: 20px; padding: 15px; border: 1px solid #ccc; max-height: 250px; overflow-y: auto; }
-        table { width: 100%; font-size: 11px; border-collapse: collapse; }
-        td, th { padding: 8px; border-bottom: 1px solid #eee; }
+        /* BOTÓN DE DESCARGA SEGÚN IMAGEN */
+        .btn-download {
+            width: 100%; background: white; color: #000; border: 1px solid #ccc; padding: 15px; border-radius: 30px; 
+            font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; margin-top: 15px;
+        }
+        .btn-download img { width: 20px; height: 20px; }
 
-        .tag { padding: 2px 6px; border-radius: 5px; color: white; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+        /* TABLA DE VALORES ESTÉTICA */
+        .table-container { margin-top: 25px; background: white; border-radius: 20px; padding: 20px; border: 1px solid #eee; }
+        .table-container h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-top: 0; text-align: center; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { border-bottom: 2px solid #F2F2F2; padding: 10px; color: #666; }
+        td { padding: 10px; text-align: center; border-bottom: 1px solid #F2F2F2; color: #333; }
+        tr:last-child td { border-bottom: none; }
+
+        .special-points-list { margin-top: 15px; font-size: 13px; color: #555; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 10px; }
+        .point-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
     </style>
 </head>
 <body>
 
-<div class="calculadora-moderna">
+<div class="container">
     <div class="header-section">
-        <h1>Graficadora 2D</h1>
-        <p>√(Raiz) Cuadrada²</p>
+        <h1>graficadora pro</h1>
     </div>
 
-    <div id="inputs-list"></div>
-    <button onclick="addInput()" style="background:none; border:2px dashed #bbb; width:100%; padding:10px; border-radius:20px; cursor:pointer; font-weight:bold; color:#666; margin-bottom:15px;">+ Añadir f(x)</button>
-
-    <div class="pills-nav-container">
-        <button class="pill-btn active" onclick="setMode('normal', this)">Vista Normal</button>
-        <button class="pill-btn" onclick="setMode('especiales', this)">Puntos especiales</button>
-        <button class="pill-btn" onclick="setMode('area', this)">Área bajo curva</button>
+    <div id="preview-container">
+        <div id="latex-preview">$$ f(x) = \dots $$</div>
     </div>
 
-    <div id="select-fn-container" class="select-fn-box">
-        <label style="font-size: 12px; font-weight: bold;">Analizar:</label>
-        <select id="target-fn" onchange="draw()"></select>
+    <label>función a graficar</label>
+    <input id="funcion" placeholder="Ej: x^2 - 4" type="text" oninput="actualizarVistaPrevia()">
+
+    <button onclick="ejecutarTodo()" class="btn-principal">Generar Gráfica y Tabla</button>
+
+    <div id="graph-section">
+        <div id="root"></div>
+        <div class="special-points-list" id="points-info"></div>
     </div>
 
-    <div id="grafica-wrapper">
-        <div id="grafica"></div>
+    <div class="table-container" id="table-box" style="display:none;">
+        <h3>tabla de valores</h3>
+        <table id="vals-table">
+            <thead>
+                <tr><th>x</th><th>f(x)</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 
-    <div class="bottom-grid">
-        <div class="table-box">
-            <strong id="table-title">Valores</strong>
-            <table id="data-table">
-                <thead><tr><th>Punto</th><th>Coordenada (x, y)</th></tr></thead>
-                <tbody id="table-body"></tbody>
-            </table>
-        </div>
-        <div class="symbol-pad">
-            <button class="sym-btn" onclick="insertSym('^2')">x²</button>
-            <button class="sym-btn" onclick="insertSym('sqrt(')">√</button>
-            <button class="sym-btn" onclick="insertSym('sin(')">sin</button>
-            <button class="sym-btn" onclick="insertSym('cos(')">cos</button>
-            <button class="sym-btn" onclick="insertSym('pi')">π</button>
-            <button class="sym-btn" onclick="insertSym('abs(')">|x|</button>
-            <button class="sym-btn" onclick="insertSym('log(')">log</button>
-            <button class="sym-btn" onclick="insertSym('(')">(</button>
-            <button class="sym-btn" onclick="insertSym(')')">)</button>
-            <button class="sym-btn" onclick="exportPNG()" style="grid-column: span 2; background: #333; color: white;">Descargar PNG</button>
-        </div>
-    </div>
+    <button onclick="descargarImagen()" class="btn-download">
+        <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" alt="download">
+        Descargar en PNG
+    </button>
 </div>
 
-<canvas id="export-canvas" style="display:none;"></canvas>
-
 <script>
-let mode = 'normal';
-let lastInput = null;
+let instance = null;
 
-function setMode(m, btn) {
-    mode = m;
-    document.querySelectorAll('.pill-btn').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('select-fn-container').style.display = (m === 'especiales' || m === 'area') ? 'flex' : 'none';
-    draw();
-}
-
-function addInput(v = '') {
-    const id = Date.now();
-    const div = document.createElement('div');
-    div.className = 'input-row';
-    div.innerHTML = `
-        <input type="color" value="#${Math.floor(Math.random()*16777215).toString(16)}" onchange="draw()">
-        <input class="fn-input" placeholder="Escribe una función..." value="${v}" oninput="draw(); updateSelector();" onfocus="lastInput=this">
-        <button onclick="this.parentElement.remove(); draw(); updateSelector();">×</button>
-    `;
-    document.getElementById('inputs-list').appendChild(div);
-    if(!lastInput) lastInput = div.querySelector('.fn-input');
-    updateSelector();
-    draw();
-}
-
-function updateSelector() {
-    const sel = document.getElementById('target-fn');
-    const currentVal = sel.value;
-    sel.innerHTML = "";
-    document.querySelectorAll('.fn-input').forEach((input, i) => {
-        if(input.value.trim()) {
-            let opt = document.createElement('option');
-            opt.value = i;
-            opt.text = `Función f${i+1}`;
-            sel.add(opt);
-        }
-    });
-    if(currentVal < sel.length) sel.value = currentVal;
-}
-
-function insertSym(s) {
-    if(!lastInput) return;
-    let start = lastInput.selectionStart;
-    lastInput.value = lastInput.value.slice(0, start) + s + lastInput.value.slice(lastInput.selectionEnd);
-    draw();
-}
-
-function draw() {
-    const rows = document.querySelectorAll('.input-row');
-    const data = [];
-    const annotations = [];
-    const pointsList = []; // Para la tabla
-    let functions = [];
-
-    rows.forEach((row, i) => {
-        let fnText = row.querySelector('.fn-input').value;
-        let color = row.querySelector('input[type="color"]').value;
-        if(fnText) functions.push({fn: fnText, color: color, id: i});
-    });
-
-    functions.forEach((f, i) => {
-        data.push({
-            fn: f.fn, color: f.color,
-            closed: mode === 'area' && i == document.getElementById('target-fn').value,
-            graphType: 'polyline'
-        });
-    });
-
-    if(mode === 'especiales' && functions.length > 0) {
-        const targetIdx = document.getElementById('target-fn').value || 0;
-        const main = functions[targetIdx];
-        const f1 = main.fn;
-
-        try {
-            // 1. CORTES EJE X (RAÍCES) - AMARILLO
-            let roots = nerdamer.solve(f1, 'x').symbol.elements;
-            roots.slice(0, 6).forEach(r => {
-                let x = parseFloat(nerdamer(r).evaluate());
-                if(!isNaN(x)) {
-                    data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 7} });
-                    annotations.push({x: x, y: 0, text: `(${x.toFixed(2)}, 0)`});
-                    pointsList.push({type: 'Corte X', val: `(${x.toFixed(2)}, 0)`, col: '#f1c40f'});
-                }
-            });
-
-            // 2. CORTE EJE Y - AMARILLO
-            let y0 = parseFloat(nerdamer(f1).evaluate({x: 0}));
-            if(!isNaN(y0)) {
-                data.push({ points: [[0, y0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 7} });
-                annotations.push({x: 0, y: y0, text: `(0, ${y0.toFixed(2)})`});
-                pointsList.push({type: 'Corte Y', val: `(0, ${y0.toFixed(2)})`, col: '#f1c40f'});
-            }
-
-            // 3. MÁXIMOS Y MÍNIMOS (Derivadas)
-            let d1 = nerdamer.diff(f1, 'x').toString();
-            let d2 = nerdamer.diff(d1, 'x').toString();
-            let criticos = nerdamer.solve(d1, 'x').symbol.elements;
-            
-            let maxs = [], mins = [];
-            criticos.forEach(p => {
-                let x = parseFloat(nerdamer(p).evaluate());
-                let y = parseFloat(nerdamer(f1).evaluate({x: x}));
-                let curbatura = parseFloat(nerdamer(d2).evaluate({x: x}));
-                if(!isNaN(x) && !isNaN(y)) {
-                    if(curbatura < 0) maxs.push([x, y]);
-                    else mins.push([x, y]);
-                }
-            });
-
-            maxs.sort((a,b) => Math.abs(a[0]) - Math.abs(b[0])).slice(0,6).forEach(p => {
-                data.push({ points: [p], fnType: 'points', graphType: 'scatter', color: '#3498db', attr: {r: 8} });
-                annotations.push({x: p[0], y: p[1], text: `MÁX: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`});
-                pointsList.push({type: 'Máximo', val: `(${p[0].toFixed(2)}, ${p[1].toFixed(2)})`, col: '#3498db'});
-            });
-
-            mins.sort((a,b) => Math.abs(a[0]) - Math.abs(b[0])).slice(0,6).forEach(p => {
-                data.push({ points: [p], fnType: 'points', graphType: 'scatter', color: '#e74c3c', attr: {r: 8} });
-                annotations.push({x: p[0], y: p[1], text: `MÍN: (${p[0].toFixed(2)}, ${p[1].toFixed(2)})`});
-                pointsList.push({type: 'Mínimo', val: `(${p[0].toFixed(2)}, ${p[1].toFixed(2)})`, col: '#e74c3c'});
-            });
-
-            // 4. INTERSECCIONES (Cruces entre funciones) - MORADO
-            functions.forEach((other, idx) => {
-                if(idx != targetIdx) {
-                    let inters = nerdamer.solve(`${f1} = ${other.fn}`, 'x').symbol.elements;
-                    inters.slice(0, 6).forEach(pt => {
-                        let x = parseFloat(nerdamer(pt).evaluate());
-                        let y = parseFloat(nerdamer(f1).evaluate({x: x}));
-                        if(!isNaN(x)) {
-                            data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: '#9b59b6', attr: {r: 7} });
-                            annotations.push({x: x, y: y, text: `Cruce: (${x.toFixed(2)}, ${y.toFixed(2)})`});
-                            pointsList.push({type: 'Cruce', val: `(${x.toFixed(2)}, ${y.toFixed(2)})`, col: '#9b59b6'});
-                        }
-                    });
-                }
-            });
-
-        } catch(e) {}
-    }
-
-    const wrapper = document.getElementById('grafica-wrapper');
-    functionPlot({
-        target: '#grafica',
-        width: wrapper.offsetWidth,
-        height: 500,
-        grid: true,
-        xAxis: { domain: [-10, 10] },
-        yAxis: { domain: [-10, 10] },
-        tip: {
-            xLine: true, yLine: true,
-            renderer: function(x, y) { return `(${x.toFixed(2)}, ${y.toFixed(2)})`; }
-        },
-        data: data,
-        annotations: annotations
-    });
-
-    updateTable(pointsList, functions[document.getElementById('target-fn').value]?.fn);
-}
-
-function updateTable(points, currentFn) {
-    const body = document.getElementById('table-body');
-    const title = document.getElementById('table-title');
-    body.innerHTML = "";
-
-    if(mode === 'especiales') {
-        title.innerText = "Puntos Especiales Detectados";
-        points.forEach(p => {
-            body.innerHTML += `<tr>
-                <td><span class="tag" style="background:${p.col}">${p.type}</span></td>
-                <td style="font-family:'Roboto Mono'">${p.val}</td>
-            </tr>`;
-        });
+function actualizarVistaPrevia() {
+    const input = document.getElementById('funcion').value.trim();
+    const preview = document.getElementById('latex-preview');
+    if (!input) {
+        preview.innerHTML = `$$ f(x) = \\dots $$`;
     } else {
-        title.innerText = "Muestra de Valores (x, y)";
-        if(!currentFn) return;
-        for(let x = -2; x <= 2; x += 1) {
+        try {
+            const tex = Algebrite.run(`printlatex(${input.replace(/ln/g, 'log')})`);
+            preview.innerHTML = `$$ f(x) = ${tex} $$`;
+        } catch (e) { preview.innerHTML = `$$ \dots $$`; }
+    }
+    MathJax.typesetPromise([preview]);
+}
+
+function ejecutarTodo() {
+    const expr = document.getElementById('funcion').value.trim();
+    if (!expr) return;
+
+    graficar(expr);
+    generarTabla(expr);
+}
+
+function graficar(fStr) {
+    const compiled = math.compile(fStr);
+    const annotations = [];
+    const infoDiv = document.getElementById('points-info');
+    infoDiv.innerHTML = '';
+
+    // Buscar puntos especiales (Raíces e Intersección Y)
+    try {
+        // Intersección Y
+        const yInt = compiled.evaluate({x: 0});
+        if (!isNaN(yInt)) {
+            annotations.push({ y: yInt, text: 'Int Y' });
+            agregarInfoPunto('Int Y', 0, yInt, '#FF5722');
+        }
+
+        // Raíces aproximadas (de -10 a 10)
+        for(let i = -10; i <= 10; i += 0.5) {
             try {
-                let y = parseFloat(nerdamer(currentFn).evaluate({x: x})).toFixed(2);
-                body.innerHTML += `<tr><td>x = ${x}</td><td>y = ${y}</td></tr>`;
+                const root = math.findRoot(compiled, i);
+                if (Math.abs(compiled.evaluate({x: root})) < 0.01) {
+                    annotations.push({ x: root, text: 'Raíz' });
+                    agregarInfoPunto('Raíz', root, 0, '#4CAF50');
+                }
             } catch(e){}
         }
-    }
+    } catch(e) { console.log("Error buscando puntos"); }
+
+    instance = functionPlot({
+        target: '#root',
+        width: 540,
+        height: 350,
+        grid: true,
+        data: [{
+            fn: fStr,
+            sampler: 'builtIn',
+            graphType: 'polyline',
+            color: 'black'
+        }],
+        annotations: annotations
+    });
 }
 
-function exportPNG() {
-    const svg = document.querySelector('#grafica svg');
-    const canvas = document.getElementById('export-canvas');
-    const ctx = canvas.getContext('2d');
-    const xml = new XMLSerializer().serializeToString(svg);
-    const img = new Image();
-    canvas.width = svg.clientWidth * 2;
-    canvas.height = svg.clientHeight * 2;
-    const blob = new Blob([xml], {type: 'image/svg+xml;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    img.onload = () => {
-        ctx.fillStyle = "white";
-        ctx.fillRect(0,0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        ctx.font = "bold 30px 'Playfair Display'";
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
-        ctx.textAlign = "right";
-        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
-        const a = document.createElement('a');
-        a.download = 'grafica_raiz_cuadrada.png';
-        a.href = canvas.toDataURL();
-        a.click();
-    };
-    img.src = url;
+function agregarInfoPunto(tipo, x, y, color) {
+    const div = document.getElementById('points-info');
+    div.innerHTML += `
+        <div class="point-item">
+            <span class="dot" style="background:${color}"></span>
+            <b>${tipo}:</b> (${x.toFixed(2)}, ${y.toFixed(2)})
+        </div>`;
 }
 
-window.onload = () => { addInput('x^2 - 4'); addInput('2*x'); draw(); };
-window.onresize = draw;
+function generarTabla(fStr) {
+    const tbody = document.querySelector('#vals-table tbody');
+    const tableBox = document.getElementById('table-box');
+    tbody.innerHTML = '';
+    const compiled = math.compile(fStr);
+
+    const puntos = [-3, -2, -1, 0, 1, 2, 3];
+    puntos.forEach(x => {
+        try {
+            const y = compiled.evaluate({x: x});
+            const row = `<tr><td>${x}</td><td>${y.toFixed(2)}</td></tr>`;
+            tbody.innerHTML += row;
+        } catch(e) {}
+    });
+
+    tableBox.style.display = 'block';
+}
+
+function descargarImagen() {
+    const container = document.querySelector('.container');
+    html2canvas(container, { backgroundColor: '#ffffff', borderRadius: 35 }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'mi_grafica_pro.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+
+// Inicialización
+actualizarVistaPrevia();
 </script>
+
 </body>
 </html>
