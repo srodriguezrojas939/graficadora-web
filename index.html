@@ -158,16 +158,16 @@
                 <span class="main-sym">|x|</span><span class="sub-label">Absoluto</span>
             </button>
 
-            <div class="btn-png-container">
-                <button class="btn-png" onclick="exportPNG()">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    <span>Descargar en PNG</span>
-                </button>
-            </div>
+           <div class="btn-png-container">
+    <button class="btn-png" onclick="exportPNG()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19c2.5 0 4.5-2 4.5-4.5 0-2-1.5-3.8-3.5-4.2-.4-3.4-3.2-6.3-6.5-6.3-2.6 0-4.8 1.8-5.5 4.3C4.5 8.6 3 10.4 3 12.5 3 15 5 17 7.5 17h1.5"></path>
+            <polyline points="9 15 12 18 15 15"></polyline>
+            <line x1="12" y1="9" x2="12" y2="18"></line>
+        </svg>
+        <span>Descargar en PNG</span>
+    </button>
+</div>
         </div>
     </div>
 </div>
@@ -343,18 +343,50 @@ function exportPNG() {
     const ctx = canvas.getContext('2d');
     const xml = new XMLSerializer().serializeToString(svg);
     const img = new Image();
+
+    // Aumentamos la resolución para que se vea nítido
     canvas.width = svg.clientWidth * 2;
     canvas.height = svg.clientHeight * 2;
+
     const blob = new Blob([xml], {type: 'image/svg+xml;charset=utf-8'});
     const url = URL.createObjectURL(blob);
+
     img.onload = () => {
+        // 1. Rellenar fondo blanco (si no, sería transparente)
         ctx.fillStyle = "white";
-        ctx.fillRect(0,0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 2. Dibujar la gráfica SVG sobre el canvas
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // --- INICIO MARCA DE AGUA ---
+
+        // Configurar la fuente: Negrita, tamaño relativo (pequeño), Playfair Display
+        // Usamos 24px que se verá pequeño en una imagen de alta resolución.
+        ctx.font = "bold 24px 'Playfair Display', serif";
+
+        // Configurar el color: Usamos gris con transparencia (rgba) para efecto sutil
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+
+        // Configurar alineación: Alineamos a la derecha y abajo para posicionar fácil en la esquina
+        ctx.textAlign = "right";
+        ctx.textBaseline = "bottom";
+
+        // Dibujar el texto:
+        // x = ancho total menos un margen de 40px
+        // y = alto total menos un margen de 40px
+        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
+
+        // --- FIN MARCA DE AGUA ---
+
+        // 3. Iniciar descarga
         const a = document.createElement('a');
-        a.download = 'mi_grafica.png';
+        a.download = 'mi_grafica_con_marca.png';
         a.href = canvas.toDataURL();
         a.click();
+        
+        // Limpiar memoria
+        URL.revokeObjectURL(url);
     };
     img.src = url;
 }
