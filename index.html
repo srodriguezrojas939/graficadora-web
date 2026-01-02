@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graficadora 2D Pro - √(Raiz) Cuadrada²</title>
+    <title>Graficadora Pro - Plotly Engine</title>
 
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Solve.js"></script>
-    <script src="https://unpkg.com/d3@3/d3.min.js"></script>
-    <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans:wght@400;600;700&family=Roboto+Mono&display=swap');
 
-        body { background: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Open Sans', sans-serif; }
+        body { background: #fdfdfd; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; font-family: 'Open Sans', sans-serif; }
         
         .calculadora-moderna {
             max-width: 850px; width: 100%; padding: 40px 30px;
@@ -29,10 +28,8 @@
 
         .input-row { display: flex; gap: 10px; align-items: center; background: white; padding: 10px 18px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 12px; }
         .fn-input { flex: 1; border: none; outline: none; font-family: 'Roboto Mono', monospace; font-size: 15px; }
-        input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
-
-        .btn-delete { background: none; border: none; color: #999; font-size: 20px; cursor: pointer; font-weight: bold; }
-        .btn-delete:hover { color: #e74c3c; }
+        
+        .btn-delete { background: none; border: none; color: #ff4d4d; font-size: 20px; cursor: pointer; font-weight: bold; padding: 0 5px; }
 
         /* Píldoras Estilo Imagen */
         .pills-nav-container {
@@ -46,24 +43,21 @@
         }
         .pill-btn.active { background: white; color: black; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 700; }
 
-        #grafica-wrapper { background: white; border-radius: 30px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 20px; }
+        #grafica-div { background: white; border-radius: 30px; height: 500px; border: 1px solid #ddd; overflow: hidden; margin-bottom: 20px; }
         
         .boton-descarga { 
             background: white; border: 1px solid #ccc; border-radius: 30px; 
             padding: 12px 25px; font-weight: 700; cursor: pointer; 
             display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px;
-            transition: 0.2s;
         }
-        .boton-descarga:hover { background: #f9f9f9; transform: translateY(-1px); }
 
         .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
         .table-box { background: white; border-radius: 20px; padding: 15px; border: 1px solid #ccc; max-height: 250px; overflow-y: auto; }
         table { width: 100%; font-size: 11px; border-collapse: collapse; }
         td, th { padding: 8px; border-bottom: 1px solid #eee; }
-
-        .tag { padding: 2px 6px; border-radius: 5px; color: white; font-size: 9px; font-weight: bold; }
         
-        .select-fn { padding: 8px; border-radius: 15px; border: 1px solid #ccc; margin-bottom: 15px; display: none; }
+        .tag { padding: 2px 6px; border-radius: 5px; color: white; font-size: 9px; font-weight: bold; }
+        .select-fn { padding: 10px; border-radius: 15px; border: 1px solid #ccc; margin-bottom: 15px; background: white; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
@@ -89,33 +83,27 @@
         <img src="https://cdn-icons-png.flaticon.com/512/724/724933.png" width="16"> Descargar en PNG
     </button>
 
-    <div id="grafica-wrapper">
-        <div id="grafica"></div>
-    </div>
+    <div id="grafica-div"></div>
 
     <div class="bottom-grid">
         <div class="table-box">
             <strong id="table-title">Datos</strong>
-            <table id="data-table">
-                <thead><tr><th>Tipo</th><th>Coordenada</th></tr></thead>
+            <table>
+                <thead><tr><th>Punto</th><th>Coordenada</th></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
         <div style="font-size: 12px; color: #666; background: white; padding: 15px; border-radius: 20px; border: 1px solid #ccc;">
-            <strong>Guía de Puntos Especiales:</strong><br><br>
-            <span style="color:#f1c40f">●</span> Cortes con ejes X e Y<br>
-            <span style="color:#3498db">●</span> Máximos Relativos<br>
-            <span style="color:#e74c3c">●</span> Mínimos Relativos<br>
-            <span style="color:#9b59b6">●</span> Intersecciones entre funciones
+            <strong>Leyenda:</strong><br><br>
+            <span style="color:#f1c40f">●</span> Cortes Eje X/Y (Amarillo)<br>
+            <span style="color:#3498db">●</span> Máximos (Azul)<br>
+            <span style="color:#e74c3c">●</span> Mínimos (Rojo)
         </div>
     </div>
 </div>
 
-<canvas id="export-canvas" style="display:none;"></canvas>
-
 <script>
 let mode = 'normal';
-let lastInput = null;
 
 function setMode(m, btn) {
     mode = m;
@@ -129,8 +117,8 @@ function addInput(v = '') {
     const div = document.createElement('div');
     div.className = 'input-row';
     div.innerHTML = `
-        <input type="color" value="#${Math.floor(Math.random()*16777215).toString(16)}" onchange="draw()">
-        <input class="fn-input" placeholder="Ej: x^2 - 4" value="${v}" oninput="draw(); updateSelector();" onfocus="lastInput=this">
+        <input type="color" value="#333333" onchange="draw()">
+        <input class="fn-input" placeholder="Ej: x^2 - 4" value="${v}" oninput="draw(); updateSelector();">
         <button class="btn-delete" onclick="this.parentElement.remove(); draw(); updateSelector();">×</button>
     `;
     document.getElementById('inputs-list').appendChild(div);
@@ -140,149 +128,121 @@ function addInput(v = '') {
 
 function updateSelector() {
     const sel = document.getElementById('target-fn');
-    const currentVal = sel.value;
     sel.innerHTML = "";
     document.querySelectorAll('.fn-input').forEach((input, i) => {
         if(input.value.trim()){
             let opt = document.createElement('option');
-            opt.value = i;
-            opt.text = `Analizar Función ${i+1}`;
+            opt.value = i; opt.text = `Función f${i+1}`;
             sel.add(opt);
         }
     });
 }
 
+function generateData(fnText) {
+    const xValues = [];
+    const yValues = [];
+    for (let x = -10; x <= 10; x += 0.05) {
+        try {
+            let res = nerdamer(fnText).evaluate({x: x});
+            let y = parseFloat(res.toString());
+            if (!isNaN(y) && isFinite(y)) {
+                xValues.push(x);
+                yValues.push(y);
+            }
+        } catch(e) {}
+    }
+    return { x: xValues, y: yValues };
+}
+
 function draw() {
     const rows = document.querySelectorAll('.input-row');
-    const data = [];
-    const annotations = [];
+    const plotData = [];
     const pointsList = [];
-    let functions = [];
+    const targetIdx = document.getElementById('target-fn').value || 0;
 
     rows.forEach((row, i) => {
         let fnText = row.querySelector('.fn-input').value;
         let color = row.querySelector('input[type="color"]').value;
-        if(fnText) functions.push({fn: fnText, color: color, id: i});
-    });
+        if (!fnText) return;
 
-    functions.forEach((f, i) => {
-        data.push({
-            fn: f.fn, color: f.color,
-            closed: mode === 'area' && i == document.getElementById('target-fn').value,
-            graphType: 'polyline',
-            sampler: 'builtIn'
-        });
-    });
+        let curve = generateData(fnText);
+        let trace = {
+            x: curve.x, y: curve.y,
+            type: 'scatter', mode: 'lines',
+            name: `f${i+1}`, line: { color: color, width: 3 }
+        };
 
-    if(mode === 'especiales' && functions.length > 0) {
-        const targetIdx = document.getElementById('target-fn').value || 0;
-        const mainFn = functions[targetIdx].fn;
+        if (mode === 'area' && i == targetIdx) trace.fill = 'tozeroy';
+        plotData.push(trace);
 
-        try {
-            // CORTES X
-            let roots = nerdamer.solve(mainFn, 'x').symbol.elements;
-            roots.slice(0,6).forEach(r => {
-                let x = parseFloat(nerdamer(r).evaluate());
-                if(!isNaN(x) && isFinite(x)) {
-                    data.push({ points: [[x, 0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 7} });
-                    annotations.push({x: x, y: 0, text: `(${x.toFixed(2)}, 0)`});
-                    pointsList.push({t: 'Corte X', v: `(${x.toFixed(2)}, 0)`, c: '#f1c40f'});
+        // --- LÓGICA DE PUNTOS ESPECIALES ---
+        if (mode === 'especiales' && i == targetIdx) {
+            try {
+                // 1. CORTES EJE X (AMARILLO)
+                let roots = nerdamer.solve(fnText, 'x').symbol.elements;
+                let rX = [], rY = [];
+                roots.map(r => parseFloat(nerdamer(r).evaluate())).filter(v => !isNaN(v)).sort((a,b)=>Math.abs(a)-Math.abs(b)).slice(0,6).forEach(x => {
+                    rX.push(x); rY.push(0);
+                    pointsList.push({t: 'Raíz', v: `(${x.toFixed(2)}, 0)`, c: '#f1c40f'});
+                });
+                plotData.push({ x: rX, y: rY, mode: 'markers', marker: { color: '#f1c40f', size: 12, line: {width: 2, color: 'white'} }, name: 'Corte X' });
+
+                // 2. CORTE EJE Y
+                let y0 = parseFloat(nerdamer(fnText).evaluate({x: 0}));
+                if(!isNaN(y0)) {
+                    plotData.push({ x: [0], y: [y0], mode: 'markers', marker: { color: '#f1c40f', size: 12, border: 'white' }, name: 'Corte Y' });
+                    pointsList.push({t: 'Corte Y', v: `(0, ${y0.toFixed(2)})`, c: '#f1c40f'});
                 }
-            });
 
-            // CORTE Y
-            let y0 = parseFloat(nerdamer(mainFn).evaluate({x: 0}));
-            if(!isNaN(y0)) {
-                data.push({ points: [[0, y0]], fnType: 'points', graphType: 'scatter', color: '#f1c40f', attr: {r: 7} });
-                annotations.push({x: 0, y: y0, text: `(0, ${y0.toFixed(2)})`});
-                pointsList.push({t: 'Corte Y', v: `(0, ${y0.toFixed(2)})`, c: '#f1c40f'});
-            }
+                // 3. MAX/MIN (DERIVADAS)
+                let d1 = nerdamer.diff(fnText, 'x').toString();
+                let d2 = nerdamer.diff(d1, 'x').toString();
+                let crits = nerdamer.solve(d1, 'x').symbol.elements;
+                
+                let mxX = [], mxY = [], mnX = [], mnY = [];
+                crits.map(p => parseFloat(nerdamer(p).evaluate())).filter(v => !isNaN(v)).forEach(x => {
+                    let y = parseFloat(nerdamer(fnText).evaluate({x: x}));
+                    let curv = parseFloat(nerdamer(d2).evaluate({x: x}));
+                    if(curv < 0) { mxX.push(x); mxY.push(y); pointsList.push({t:'Máximo', v:`(${x.toFixed(2)}, ${y.toFixed(2)})`, c:'#3498db'}); }
+                    else { mnX.push(x); mnY.push(y); pointsList.push({t:'Mínimo', v:`(${x.toFixed(2)}, ${y.toFixed(2)})`, c:'#e74c3c'}); }
+                });
+                plotData.push({ x: mxX, y: mxY, mode: 'markers', marker: { color: '#3498db', size: 14 }, name: 'Máximo' });
+                plotData.push({ x: mnX, y: mnY, mode: 'markers', marker: { color: '#e74c3c', size: 14 }, name: 'Mínimo' });
 
-            // MAX/MIN
-            let d1 = nerdamer.diff(mainFn, 'x').toString();
-            let d2 = nerdamer.diff(d1, 'x').toString();
-            let crits = nerdamer.solve(d1, 'x').symbol.elements;
-            crits.slice(0,6).forEach(p => {
-                let x = parseFloat(nerdamer(p).evaluate());
-                let y = parseFloat(nerdamer(mainFn).evaluate({x: x}));
-                let curv = parseFloat(nerdamer(d2).evaluate({x: x}));
-                if(!isNaN(x) && !isNaN(y)) {
-                    let isMax = curv < 0;
-                    data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: isMax ? '#3498db':'#e74c3c', attr: {r: 8} });
-                    annotations.push({x: x, y: y, text: `${isMax?'MAX':'MIN'} (${x.toFixed(2)}, ${y.toFixed(2)})`});
-                    pointsList.push({t: isMax?'Máximo':'Mínimo', v: `(${x.toFixed(2)}, ${y.toFixed(2)})`, c: isMax?'#3498db':'#e74c3c'});
-                }
-            });
-
-            // INTERSECCIONES
-            functions.forEach((other, idx) => {
-                if(idx != targetIdx) {
-                    let inters = nerdamer.solve(`${mainFn} = ${other.fn}`, 'x').symbol.elements;
-                    inters.slice(0,6).forEach(pt => {
-                        let x = parseFloat(nerdamer(pt).evaluate());
-                        let y = parseFloat(nerdamer(mainFn).evaluate({x: x}));
-                        if(!isNaN(x)) {
-                            data.push({ points: [[x, y]], fnType: 'points', graphType: 'scatter', color: '#9b59b6', attr: {r: 7} });
-                            annotations.push({x: x, y: y, text: `Cruce (${x.toFixed(2)}, ${y.toFixed(2)})`});
-                            pointsList.push({t: 'Cruce', v: `(${x.toFixed(2)}, ${y.toFixed(2)})`, c: '#9b59b6'});
-                        }
-                    });
-                }
-            });
-        } catch(e){}
-    }
-
-    functionPlot({
-        target: '#grafica',
-        width: document.getElementById('grafica-wrapper').offsetWidth,
-        height: 500,
-        grid: true,
-        xAxis: { domain: [-10, 10], label: 'x' },
-        yAxis: { domain: [-10, 10], label: 'y' },
-        disableZoom: false,
-        data: data,
-        annotations: annotations,
-        tip: {
-            xLine: true, yLine: true,
-            renderer: (x, y) => `(${x.toFixed(2)}, ${y.toFixed(2)})`
+            } catch(e) {}
         }
     });
 
+    const layout = {
+        showlegend: false,
+        margin: { t: 20, b: 20, l: 20, r: 20 },
+        hovermode: 'closest',
+        xaxis: {
+            zeroline: true, zerolinewidth: 2, zerolinecolor: '#000',
+            gridcolor: '#eee', range: [-10, 10], fixedrange: false
+        },
+        yaxis: {
+            zeroline: true, zerolinewidth: 2, zerolinecolor: '#000',
+            gridcolor: '#eee', range: [-10, 10], fixedrange: false
+        },
+        plot_bgcolor: 'white'
+    };
+
+    Plotly.newPlot('grafica-div', plotData, layout, {responsive: true, displayModeBar: false});
+
+    // Actualizar Tabla
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = "";
-    pointsList.forEach(p => {
+    pointsList.slice(0,18).forEach(p => {
         tbody.innerHTML += `<tr><td><span class="tag" style="background:${p.c}">${p.t}</span></td><td>${p.v}</td></tr>`;
     });
 }
 
 function exportPNG() {
-    const svg = document.querySelector('#grafica svg');
-    const canvas = document.getElementById('export-canvas');
-    const ctx = canvas.getContext('2d');
-    const xml = new XMLSerializer().serializeToString(svg);
-    const img = new Image();
-    canvas.width = svg.clientWidth * 2;
-    canvas.height = svg.clientHeight * 2;
-    const blob = new Blob([xml], {type: 'image/svg+xml;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    img.onload = () => {
-        ctx.fillStyle = "white";
-        ctx.fillRect(0,0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        ctx.font = "bold 32px 'Playfair Display'";
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
-        ctx.textAlign = "right";
-        ctx.fillText("√(Raiz) Cuadrada²", canvas.width - 40, canvas.height - 40);
-        const a = document.createElement('a');
-        a.download = 'grafica_2d.png';
-        a.href = canvas.toDataURL();
-        a.click();
-    };
-    img.src = url;
+    Plotly.downloadImage('grafica-div', {format: 'png', width: 1000, height: 800, filename: 'grafica_pro'});
 }
 
-window.onload = () => { addInput('x^2 - 4'); addInput('2*x'); draw(); };
-window.onresize = draw;
+window.onload = () => { addInput('x^2 - 4'); addInput('sin(x)'); draw(); };
 </script>
 </body>
 </html>
